@@ -1,0 +1,31 @@
+@use 'common';
+
+.loadingContainer {
+  @extend .flex-center;
+  min-height: 100vh;
+}
+
+.errorContainer {
+  @extend .flex-center;
+  flex-direction: column;
+  min-height: 100vh;
+  gap: 20px;
+}
+
+.errorMessage {
+  color: red;
+}
+
+.backButton {
+  @extend .button-md;
+  @extend .button-primary;
+}
+
+.pageContainer {
+  min-height: 100vh;
+  background-color: #f9f9f9;
+}
+
+.content {
+  padding-bottom: 40px;
+}

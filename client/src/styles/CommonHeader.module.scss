@@ -1,0 +1,52 @@
+@use 'common';
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: #fff;
+  border-bottom: 2px solid #ddd;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pageTitle {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+}
+
+.headerButtons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.historyButton {
+  @extend .button-sm;
+  @extend .button-primary;
+}
+
+.questionButton {
+  @extend .button-sm;
+  @extend .button-success;
+}
+
+.resultButton {
+  @extend .button-sm;
+  @extend .button-success;
+}
+
+.homeButton {
+  @extend .button-sm;
+  @extend .button-secondary;
+}
+
+.logoutButton {
+  @extend .button-sm;
+  @extend .button-danger;
+}

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/HH19xx/philoCompass/internal/model"
 	"github.com/HH19xx/philoCompass/internal/service"
 )
 
@@ -131,9 +132,58 @@ func (h *Handler) GetNeighborDistributionByAnswerIDHandler(c *gin.Context) {
 	// 哲学ラベルを計算
 	philoLabel := service.CalculatePhiloLabel(answer)
 
+	// 最近傍哲学者を検索
+	philosophers, err := h.philosopherRepo.GetAllPhilosophers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve philosophers"})
+		return
+	}
+	closestPhilosopher := service.FindClosestPhilosopher(answer, philosophers)
+
 	c.JSON(http.StatusOK, gin.H{
-		"distribution": distribution,
-		"answer":       answer,
-		"label":        philoLabel,
+		"distribution":         distribution,
+		"answer":               answer,
+		"label":                philoLabel,
+		"closest_philosopher":  closestPhilosopher,
 	})
+}
+
+// GetCategoryDistributionByAnswerIDHandler 指定した回答IDのカテゴリ別スコア分布を取得（認証不要）
+func (h *Handler) GetCategoryDistributionByAnswerIDHandler(c *gin.Context) {
+	// パスパラメータから回答IDを取得
+	answerIDStr := c.Param("answer_id")
+	answerID, err := strconv.Atoi(answerIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid answer_id"})
+		return
+	}
+
+	// 指定された回答を取得
+	answer, err := h.answerRepo.GetAnswerByID(answerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve answer"})
+		return
+	}
+	if answer == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Answer not found"})
+		return
+	}
+
+	// すべての回答を取得
+	allAnswers, err := h.answerRepo.GetAllAnswers()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve all answers"})
+		return
+	}
+
+	// []model.Answerを[]*model.Answerに変換
+	var answerPointers []*model.Answer
+	for i := range allAnswers {
+		answerPointers = append(answerPointers, &allAnswers[i])
+	}
+
+	// カテゴリ別スコア分布を計算
+	distributions := service.CalculateCategoryDistributions(answerPointers)
+
+	c.JSON(http.StatusOK, distributions)
 }

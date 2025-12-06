@@ -1,0 +1,24 @@
+@use 'common';
+
+.pageContainer {
+  @extend .page-container;
+}
+
+.header {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
+}
+
+.historyButton {
+  @extend .button-sm;
+  @extend .button-primary;
+}
+
+.logoutButton {
+  @extend .button-sm;
+  @extend .button-danger;
+}

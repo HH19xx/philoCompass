@@ -21,7 +21,9 @@ CREATE TABLE answers (
     answer_15       SMALLINT NOT NULL CHECK (answer_15 BETWEEN -2 AND 2),
     answer_16       SMALLINT NOT NULL CHECK (answer_16 BETWEEN -2 AND 2),
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP
+    created_by      VARCHAR(50),
+    updated_at      TIMESTAMP,
+    updated_by      VARCHAR(50)
 );
 
 -- ユーザーIDでの検索を高速化

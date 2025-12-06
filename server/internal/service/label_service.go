@@ -52,12 +52,12 @@ func CalculatePhiloLabel(answer *model.Answer) PhiloLabel {
 	mainLabel += getAestheticsLabel(categoryScores.Aesthetics)
 	mainLabel += getPostmodernLabel(categoryScores.Postmodern)
 
-	// サブラベルを生成（4文字）
+	// サブラベルを生成（4文字）Q13-Q16の順序で
 	subLabel := ""
-	subLabel += getQ16Label(subScores.Q16) // 論理 vs 現象学
+	subLabel += getQ13Label(subScores.Q13) // 不可知論 vs 可知論
 	subLabel += getQ14Label(subScores.Q14) // 義務論 vs 帰結主義
 	subLabel += getQ15Label(subScores.Q15) // 科学的 vs 人文的
-	subLabel += getQ13Label(subScores.Q13) // 不可知論 vs 可知論
+	subLabel += getQ16Label(subScores.Q16) // 論理 vs 現象学
 
 	fullLabel := mainLabel + "-" + subLabel
 

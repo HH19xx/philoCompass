@@ -1,19 +1,32 @@
 import React, { useState } from 'react';
 import { questions, answerOptions } from '../data/questions';
+import styles from '../styles/Question.module.scss';
 
 // 回答完了時のコールバック型定義
 type OnCompleteCallback = (answers: number[]) => void;
 
 type Props = {
   onComplete: OnCompleteCallback;
+  // 質問画面の初期状態（履歴画面から戻る際に使用）
+  initialIndex?: number;
+  initialAnswers?: (number | null)[];
+  // 質問画面の進行状態を保存するコールバック（履歴画面に遷移する際に使用）
+  onSaveState?: (index: number, answers: (number | null)[]) => void;
 };
 
 // 質問ページコンポーネント
-const QuestionPage: React.FC<Props> = ({ onComplete }) => {
+const QuestionPage: React.FC<Props> = ({ onComplete, initialIndex = 0, initialAnswers, onSaveState }) => {
   // 現在の質問インデックス（0始まり）
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
   // 16個の回答を保存する配列（初期値null）
-  const [answers, setAnswers] = useState<(number | null)[]>(Array(16).fill(null));
+  const [answers, setAnswers] = useState<(number | null)[]>(initialAnswers || Array(16).fill(null));
+
+  // 状態が変更されたら親コンポーネントに通知（履歴画面に遷移する際に使用）
+  React.useEffect(() => {
+    if (onSaveState) {
+      onSaveState(currentIndex, answers);
+    }
+  }, [currentIndex, answers, onSaveState]);
 
   // 回答選択時の処理
   const handleAnswer = (value: number) => {
@@ -41,74 +54,33 @@ const QuestionPage: React.FC<Props> = ({ onComplete }) => {
   const progress = ((currentIndex + 1) / questions.length) * 100;
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', padding: '20px' }}>
+    <div className={styles.container}>
       {/* プログレスバー */}
-      <div style={{ marginBottom: '20px' }}>
-        <div style={{ 
-          width: '100%', 
-          height: '8px', 
-          backgroundColor: '#e0e0e0',
-          borderRadius: '4px',
-          overflow: 'hidden'
-        }}>
-          <div style={{
-            width: `${progress}%`,
-            height: '100%',
-            backgroundColor: '#4caf50',
-            transition: 'width 0.3s ease'
-          }} />
+      <div className={styles.progressSection}>
+        <div className={styles.progressBarContainer}>
+          <div className={styles.progressBar} style={{ width: `${progress}%` }} />
         </div>
-        <p style={{ textAlign: 'center', marginTop: '8px', color: '#666' }}>
+        <p className={styles.progressText}>
           質問 {currentIndex + 1} / {questions.length}
         </p>
       </div>
 
       {/* 質問カード */}
-      <div style={{
-        backgroundColor: 'white',
-        padding: '30px',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        marginBottom: '20px'
-      }}>
-        <p style={{ 
-          fontSize: '12px', 
-          color: '#888', 
-          marginBottom: '10px' 
-        }}>
+      <div className={styles.questionCard}>
+        <p className={styles.categoryLabel}>
           {currentQuestion.category}
         </p>
-        <h2 style={{ 
-          fontSize: '20px', 
-          marginBottom: '30px',
-          lineHeight: '1.6'
-        }}>
+        <h2 className={styles.questionText}>
           {currentQuestion.text}
         </h2>
 
         {/* 回答ボタン */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className={styles.answerButtons}>
           {answerOptions.map((option) => (
             <button
               key={option.value}
               onClick={() => handleAnswer(option.value)}
-              style={{
-                padding: '16px',
-                fontSize: '16px',
-                border: '2px solid #ddd',
-                borderRadius: '8px',
-                backgroundColor: 'white',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#4caf50';
-                e.currentTarget.style.backgroundColor = '#f0f8f0';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = '#ddd';
-                e.currentTarget.style.backgroundColor = 'white';
-              }}
+              className={styles.answerButton}
             >
               {option.label}
             </button>
@@ -118,17 +90,7 @@ const QuestionPage: React.FC<Props> = ({ onComplete }) => {
 
       {/* 戻るボタン */}
       {currentIndex > 0 && (
-        <button
-          onClick={handleBack}
-          style={{
-            padding: '12px 24px',
-            fontSize: '14px',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            backgroundColor: 'white',
-            cursor: 'pointer',
-          }}
-        >
+        <button onClick={handleBack} className={styles.backButton}>
           ← 前の質問に戻る
         </button>
       )}

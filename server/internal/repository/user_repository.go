@@ -14,6 +14,8 @@ type UserRepository interface {
 	FindByEmail(email string) (*model.User, error)
 	Update(user *model.User) error
 	Delete(id int) error
+	GetUserByGoogleID(googleID string) (*model.User, error)            // Google IDでユーザーを取得
+	CreateUserWithGoogle(user *model.User) (int, error)                 // Google OAuth用のユーザー作成
 }
 
 type userRepository struct {
@@ -41,7 +43,7 @@ func (r *userRepository) Create(user *model.User) error {
 
 func (r *userRepository) FindByID(id int) (*model.User, error) {
 	query := `
-		SELECT id, username, email, password, deleted, created_at, created_by, updated_at, updated_by
+		SELECT id, username, email, password, google_id, deleted, created_at, created_by, updated_at, updated_by
 		FROM "user"
 		WHERE id = $1 AND deleted = false
 	`
@@ -51,6 +53,7 @@ func (r *userRepository) FindByID(id int) (*model.User, error) {
 		&user.Username,
 		&user.Email,
 		&user.Password,
+		&user.GoogleID,
 		&user.Deleted,
 		&user.CreatedAt,
 		&user.CreatedBy,
@@ -65,7 +68,7 @@ func (r *userRepository) FindByID(id int) (*model.User, error) {
 
 func (r *userRepository) FindByUsername(username string) (*model.User, error) {
 	query := `
-		SELECT id, username, email, password, deleted, created_at, created_by, updated_at, updated_by
+		SELECT id, username, email, password, google_id, deleted, created_at, created_by, updated_at, updated_by
 		FROM "user"
 		WHERE username = $1 AND deleted = false
 	`
@@ -75,6 +78,7 @@ func (r *userRepository) FindByUsername(username string) (*model.User, error) {
 		&user.Username,
 		&user.Email,
 		&user.Password,
+		&user.GoogleID,
 		&user.Deleted,
 		&user.CreatedAt,
 		&user.CreatedBy,
@@ -89,7 +93,7 @@ func (r *userRepository) FindByUsername(username string) (*model.User, error) {
 
 func (r *userRepository) FindByEmail(email string) (*model.User, error) {
 	query := `
-		SELECT id, username, email, password, deleted, created_at, created_by, updated_at, updated_by
+		SELECT id, username, email, password, google_id, deleted, created_at, created_by, updated_at, updated_by
 		FROM "user"
 		WHERE email = $1 AND deleted = false
 	`
@@ -99,6 +103,7 @@ func (r *userRepository) FindByEmail(email string) (*model.User, error) {
 		&user.Username,
 		&user.Email,
 		&user.Password,
+		&user.GoogleID,
 		&user.Deleted,
 		&user.CreatedAt,
 		&user.CreatedBy,
@@ -149,4 +154,48 @@ func (r *userRepository) Delete(id int) error {
 		return fmt.Errorf("user not found")
 	}
 	return nil
+}
+
+// GetUserByGoogleID Google IDでユーザーを取得
+func (r *userRepository) GetUserByGoogleID(googleID string) (*model.User, error) {
+	query := `
+		SELECT id, username, email, password, google_id, deleted, created_at, created_by, updated_at, updated_by
+		FROM "user"
+		WHERE google_id = $1 AND deleted = false
+	`
+	user := &model.User{}
+	err := r.db.QueryRow(query, googleID).Scan(
+		&user.ID,
+		&user.Username,
+		&user.Email,
+		&user.Password,
+		&user.GoogleID,
+		&user.Deleted,
+		&user.CreatedAt,
+		&user.CreatedBy,
+		&user.UpdatedAt,
+		&user.UpdatedBy,
+	)
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("user not found")
+	}
+	return user, err
+}
+
+// CreateUserWithGoogle Google OAuth用のユーザー作成（パスワード不要）
+func (r *userRepository) CreateUserWithGoogle(user *model.User) (int, error) {
+	query := `
+		INSERT INTO "user" (username, email, google_id, created_by)
+		VALUES ($1, $2, $3, 'google_oauth')
+		RETURNING id
+	`
+	var userID int
+	err := r.db.QueryRow(
+		query,
+		user.Username,
+		user.Email,
+		user.GoogleID,
+	).Scan(&userID)
+
+	return userID, err
 }

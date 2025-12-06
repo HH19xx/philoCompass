@@ -1,58 +1,63 @@
-# PostgreSQL版（コメント化して保持）
-# services:
-#   db:
-#     image: postgres:16
-#     container_name: philo-db
-#     environment:
-#       POSTGRES_DB: philocompass
-#       POSTGRES_USER: philocompass_user
-#       POSTGRES_PASSWORD: strongpassword
-#     ports:
-#       - "5432:5432"
-#     volumes:
-#       - db-data:/var/lib/postgresql/data
-#     healthcheck:
-#       test: ["CMD-SHELL", "pg_isready -U philocompass_user -d philocompass"]
-#       interval: 5s
-#       timeout: 5s
-#       retries: 5
-#     restart: always
-#
-#   app:
-#     build: .
-#     container_name: philo-app
-#     environment:
-#       DB_TYPE: postgres
-#       DB_HOST: db
-#       DB_PORT: 5432
-#       DB_USER: philocompass_user
-#       DB_PASSWORD: strongpassword
-#       DB_NAME: philocompass
-#       PORT: 8081
-#     ports:
-#       - "8081:8081"
-#     depends_on:
-#       db:
-#         condition: service_healthy
-#     restart: always
-#
-# volumes:
-#   db-data:
-
-# SQLite版
+# PostgreSQL版
 services:
+  db:
+    image: postgres:16
+    container_name: philo-db
+    environment:
+      POSTGRES_DB: philocompass
+      POSTGRES_USER: philocompass_user
+      POSTGRES_PASSWORD: strongpassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U philocompass_user -d philocompass"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: always
+
   app:
     build: .
     container_name: philo-app
     environment:
-      DB_TYPE: sqlite
-      SQLITE_DB_PATH: /app/data/philocompass.db
+      DB_TYPE: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: philocompass_user
+      DB_PASSWORD: strongpassword
+      DB_NAME: philocompass
       PORT: 8081
+      APP_ENV: development
+      FRONTEND_URL: http://localhost:5173
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URL: http://localhost:8081/api/auth/google/callback
     ports:
       - "8081:8081"
-    volumes:
-      - sqlite-data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
     restart: always
 
 volumes:
-  sqlite-data:
+  db-data:
+
+# SQLite版（コメント化して保持）
+# services:
+#   app:
+#     build: .
+#     container_name: philo-app
+#     environment:
+#       DB_TYPE: sqlite
+#       SQLITE_DB_PATH: /app/data/philocompass.db
+#       PORT: 8081
+#     ports:
+#       - "8081:8081"
+#     volumes:
+#       - sqlite-data:/app/data
+#     restart: always
+#
+# volumes:
+#   sqlite-data:

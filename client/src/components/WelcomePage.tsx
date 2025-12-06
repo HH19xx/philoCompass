@@ -1,156 +1,62 @@
 import React from 'react';
+import styles from '../styles/Welcome.module.scss';
 
 interface WelcomePageProps {
   onLoginClick: () => void;
   onRegisterClick: () => void;
   onGuestClick: () => void;
+  onHistoryClick?: () => void;
   onLogout?: () => void;
   isAuthenticated?: boolean;
 }
 
-const WelcomePage: React.FC<WelcomePageProps> = ({ onLoginClick, onRegisterClick, onGuestClick, onLogout, isAuthenticated = false }) => {
+const WelcomePage: React.FC<WelcomePageProps> = ({ onLoginClick, onRegisterClick, onGuestClick, onHistoryClick, onLogout, isAuthenticated = false }) => {
+  // Google OAuth認証を開始
+  const handleGoogleLogin = () => {
+    window.location.href = 'http://localhost:8081/api/auth/google';
+  };
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#f5f5f5',
-      padding: '20px',
-      position: 'relative',
-    }}>
+    <div className={styles.welcomeContainer}>
       {/* ログアウトボタン（右上） */}
       {isAuthenticated && (
-        <div style={{
-          position: 'absolute',
-          top: '20px',
-          right: '20px',
-        }}>
-          <button
-            onClick={onLogout}
-            style={{
-              padding: '8px 16px',
-              fontSize: '14px',
-              border: '2px solid #dc3545',
-              borderRadius: '8px',
-              backgroundColor: '#dc3545',
-              color: 'white',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-            }}
-          >
-            ログアウト
-          </button>
-        </div>
+        <button onClick={onLogout} className={styles.logoutButton}>
+          ログアウト
+        </button>
       )}
-      <div style={{
-        maxWidth: '500px',
-        width: '100%',
-        backgroundColor: 'white',
-        padding: '40px',
-        borderRadius: '12px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-      }}>
-        <h1 style={{
-          textAlign: 'center',
-          marginBottom: '10px',
-          fontSize: '32px',
-          color: '#333',
-        }}>
-          PhiloCompass
-        </h1>
-        <p style={{
-          textAlign: 'center',
-          color: '#666',
-          marginBottom: '40px',
-          fontSize: '14px',
-        }}>
-          あなたの思想を16次元で可視化
-        </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <button
-            onClick={onLoginClick}
-            style={{
-              padding: '16px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              border: '2px solid #007bff',
-              borderRadius: '8px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#0056b3';
-              e.currentTarget.style.borderColor = '#0056b3';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#007bff';
-              e.currentTarget.style.borderColor = '#007bff';
-            }}
-          >
-            ログイン
+      <div className={styles.welcomeCard}>
+        <h1 className={styles.title}>PhiloCompass</h1>
+        <p className={styles.subtitle}>あなたの思想を16次元で可視化</p>
+
+        <div className={styles.buttonContainer}>
+          {/* Googleログインボタン */}
+          <button onClick={handleGoogleLogin} className={styles.googleButton}>
+            Googleでログイン
           </button>
 
-          <button
-            onClick={onRegisterClick}
-            style={{
-              padding: '16px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              border: '2px solid #28a745',
-              borderRadius: '8px',
-              backgroundColor: '#28a745',
-              color: 'white',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#1e7e34';
-              e.currentTarget.style.borderColor = '#1e7e34';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#28a745';
-              e.currentTarget.style.borderColor = '#28a745';
-            }}
-          >
+          {/* 区切り線 */}
+          <div className={styles.divider}>
+            <div className={styles.dividerLine} />
+            <span className={styles.dividerText}>または</span>
+            <div className={styles.dividerLine} />
+          </div>
+
+          {/* 既存のログイン/登録ボタン */}
+          <button onClick={onLoginClick} className={styles.loginButton}>
+            メール/パスワードでログイン
+          </button>
+
+          <button onClick={onRegisterClick} className={styles.registerButton}>
             新規登録
           </button>
 
-          <button
-            onClick={onGuestClick}
-            style={{
-              padding: '16px',
-              fontSize: '16px',
-              fontWeight: 'bold',
-              border: '2px solid #ddd',
-              borderRadius: '8px',
-              backgroundColor: 'white',
-              color: '#333',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f5f5f5';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'white';
-            }}
-          >
+          <button onClick={onGuestClick} className={styles.guestButton}>
             ゲストとして参加
           </button>
         </div>
 
-        <p style={{
-          marginTop: '30px',
-          fontSize: '12px',
-          color: '#999',
-          textAlign: 'center',
-          lineHeight: '1.6',
-        }}>
+        <p className={styles.note}>
           ゲストとして参加した場合、統計には貢献しますが、<br />
           結果を保存して後で確認することはできません
         </p>

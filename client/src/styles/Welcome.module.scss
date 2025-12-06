@@ -1,0 +1,150 @@
+.welcomeContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #f5f5f5;
+  padding: 20px;
+  position: relative;
+}
+
+.logoutButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  border: 2px solid #dc3545;
+  border-radius: 8px;
+  background-color: #dc3545;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.welcomeCard {
+  max-width: 500px;
+  width: 100%;
+  background-color: white;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 32px;
+  color: #333;
+}
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 40px;
+  font-size: 14px;
+}
+
+.buttonContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.googleButton {
+  padding: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid #4285f4;
+  border-radius: 8px;
+  background-color: #4285f4;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &:hover {
+    background-color: #357ae8;
+    border-color: #357ae8;
+  }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+
+  &Line {
+    flex: 1;
+    height: 1px;
+    background-color: #ddd;
+  }
+
+  &Text {
+    color: #999;
+    font-size: 14px;
+  }
+}
+
+.loginButton {
+  padding: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+  }
+}
+
+.registerButton {
+  padding: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid #28a745;
+  border-radius: 8px;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #1e7e34;
+    border-color: #1e7e34;
+  }
+}
+
+.guestButton {
+  padding: 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  background-color: white;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}
+
+.note {
+  margin-top: 30px;
+  font-size: 12px;
+  color: #999;
+  text-align: center;
+  line-height: 1.6;
+}

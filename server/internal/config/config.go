@@ -13,26 +13,36 @@ import (
 )
 
 type Config struct {
-	DBType       string // "postgres" or "sqlite"
-	SQLiteDBPath string // SQLite使用時のファイルパス
-	DBHost       string // PostgreSQL用
-	DBPort       string
-	DBUser       string
-	DBPassword   string
-	DBName       string
-	ServerPort   string
+	DBType             string // "postgres" or "sqlite"
+	SQLiteDBPath       string // SQLite使用時のファイルパス
+	DBHost             string // PostgreSQL用
+	DBPort             string
+	DBUser             string
+	DBPassword         string
+	DBName             string
+	ServerPort         string
+	AppEnv             string // "development" or "production"
+	FrontendURL        string // フロントエンドのURL
+	GoogleClientID     string // Google OAuth クライアントID
+	GoogleClientSecret string // Google OAuth クライアントシークレット
+	GoogleRedirectURL  string // Google OAuth リダイレクトURL
 }
 
 func LoadConfig() *Config {
 	return &Config{
-		DBType:       getEnv("DB_TYPE", "sqlite"),
-		SQLiteDBPath: getEnv("SQLITE_DB_PATH", "./data/philocompass.db"),
-		DBHost:       getEnv("DB_HOST", "db"),
-		DBPort:       getEnv("DB_PORT", "5432"),
-		DBUser:       getEnv("DB_USER", "philobot_user"),
-		DBPassword:   getEnv("DB_PASSWORD", "strongpassword"),
-		DBName:       getEnv("DB_NAME", "philobot"),
-		ServerPort:   getEnv("PORT", "8081"),
+		DBType:             getEnv("DB_TYPE", "sqlite"),
+		SQLiteDBPath:       getEnv("SQLITE_DB_PATH", "./data/philocompass.db"),
+		DBHost:             getEnv("DB_HOST", "db"),
+		DBPort:             getEnv("DB_PORT", "5432"),
+		DBUser:             getEnv("DB_USER", "philobot_user"),
+		DBPassword:         getEnv("DB_PASSWORD", "strongpassword"),
+		DBName:             getEnv("DB_NAME", "philobot"),
+		ServerPort:         getEnv("PORT", "8081"),
+		AppEnv:             getEnv("APP_ENV", "development"),
+		FrontendURL:        getEnv("FRONTEND_URL", "http://localhost:5173"),
+		GoogleClientID:     getEnv("GOOGLE_CLIENT_ID", ""),
+		GoogleClientSecret: getEnv("GOOGLE_CLIENT_SECRET", ""),
+		GoogleRedirectURL:  getEnv("GOOGLE_REDIRECT_URL", "http://localhost:8081/api/auth/google/callback"),
 	}
 }
 

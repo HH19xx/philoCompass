@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
-import QuestionPage from "./components/QuestionPage";
-import ResultPage from "./components/ResultPage";
-import WelcomePage from "./components/WelcomePage";
-import LoginPage from "./components/LoginPage";
-import RegisterPage from "./components/RegisterPage";
 import { useAuth } from "./hooks/useAuth";
+import AppRouter from "./AppRouter";
+import type { AppPhase } from "./AppRouter";
+import styles from "./styles/App.module.scss";
 
 type NeighborData = {
   radius: number;
@@ -33,7 +31,50 @@ type PhiloLabel = {
   sub_scores: SubIndicators;
 };
 
-type AppPhase = "welcome" | "login" | "register" | "question" | "result";
+type DataPoint = {
+  score: number;
+  count: number;
+};
+
+type CategoryDistributionData = {
+  logic: DataPoint[];
+  ethics: DataPoint[];
+  aesthetics: DataPoint[];
+  postmodern: DataPoint[];
+};
+
+type Philosopher = {
+  id: number;
+  name: string;
+  era: string;
+  description: string;
+  answer_01: number;
+  answer_02: number;
+  answer_03: number;
+  answer_04: number;
+  answer_05: number;
+  answer_06: number;
+  answer_07: number;
+  answer_08: number;
+  answer_09: number;
+  answer_10: number;
+  answer_11: number;
+  answer_12: number;
+  answer_13: number;
+  answer_14: number;
+  answer_15: number;
+  answer_16: number;
+  deleted: boolean;
+  created_at: string;
+  created_by?: string;
+  updated_at?: string;
+  updated_by?: string;
+};
+
+type ClosestPhilosopher = {
+  philosopher: Philosopher;
+  distance: number;
+};
 
 function App() {
   const { isAuthenticated, login, logout, getAuthHeaders } = useAuth();
@@ -42,14 +83,27 @@ function App() {
   const [neighborData, setNeighborData] = useState<NeighborData[]>([]);
   const [answerID, setAnswerID] = useState<number | null>(null);
   const [philoLabel, setPhiloLabel] = useState<PhiloLabel | null>(null);
+  const [categoryDistribution, setCategoryDistribution] = useState<CategoryDistributionData | null>(null);
+  const [closestPhilosopher, setClosestPhilosopher] = useState<ClosestPhilosopher | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 質問画面の進行状態を保存（履歴画面から戻る際に復元するため）
+  const [savedQuestionIndex, setSavedQuestionIndex] = useState<number>(0);
+  const [savedPartialAnswers, setSavedPartialAnswers] = useState<(number | null)[]>(Array(16).fill(null));
+
+  // 履歴画面に遷移する前のページを記録（戻るボタンで適切なページに戻すため）
+  const [previousPhase, setPreviousPhase] = useState<AppPhase | null>(null);
+
+  // 環境変数から設定を取得
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081';
+  const APP_ENV = import.meta.env.VITE_APP_ENV || 'development';
 
   // バックエンド疎通確認（/api/hello）
   useEffect(() => {
     const checkBackend = async () => {
       try {
-        const res = await fetch("http://localhost:8081/api/hello");
+        const res = await fetch(`${API_URL}/api/hello`);
         const data = await res.json();
         console.log("[backend /hello]", data);
       } catch (err) {
@@ -57,7 +111,45 @@ function App() {
       }
     };
     checkBackend();
-  }, []);
+  }, [API_URL]);
+
+  // Google OAuthコールバック処理（URLパラメータからトークンを取得）
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+    const username = urlParams.get('user');
+
+    if (token && username) {
+      // 開発環境のみURLパラメータでのトークン受け渡しを許可
+      if (APP_ENV === 'development') {
+        const mockUser = {
+          id: 0, // 開発環境用の仮ID
+          username: username,
+          email: '',
+        };
+
+        login(token, mockUser);
+
+        // URLパラメータをクリア
+        window.history.replaceState({}, document.title, window.location.pathname);
+
+        // 質問ページに遷移
+        setPhase('question');
+      } else if (APP_ENV === 'production') {
+        // 本番環境ではURLパラメータからのトークン取得を拒否
+        console.error('本番環境ではURLパラメータによるトークン受け渡しは禁止されています');
+        setError('認証エラー: 不正なアクセス方法です');
+
+        // URLパラメータをクリアしてトップページに戻す
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else {
+        // 未知の環境の場合も拒否
+        console.error('不明な環境設定です');
+        setError('認証エラー: 環境設定が不正です');
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [login, APP_ENV]);
 
   // ログイン成功時の処理
   const handleLoginSuccess = (token: string, user: { id: number; username: string; email: string }) => {
@@ -106,6 +198,16 @@ function App() {
       const statsData = await statsResponse.json();
       setNeighborData(statsData.distribution);
       setPhiloLabel(statsData.label);
+      setClosestPhilosopher(statsData.closest_philosopher);
+
+      // カテゴリ別スコア分布を取得（認証不要）
+      const categoryResponse = await fetch(`http://localhost:8081/api/statistics/category-distribution/${savedAnswerID}`);
+      if (!categoryResponse.ok) {
+        throw new Error("カテゴリ分布データの取得に失敗しました");
+      }
+
+      const categoryData = await categoryResponse.json();
+      setCategoryDistribution(categoryData);
 
       // 結果画面に遷移
       setPhase("result");
@@ -149,18 +251,31 @@ function App() {
 
   // 保存をスキップ
   const handleSkipSave = () => {
-    // 何もしない（結果画面に留まる）
     alert("結果は保存されませんでした");
+  };
+
+  // 状態をリセット
+  const resetState = () => {
+    setAnswers([]);
+    setNeighborData([]);
+    setAnswerID(null);
+    setPhiloLabel(null);
+    setCategoryDistribution(null);
+    setClosestPhilosopher(null);
+    // 質問状態もリセット
+    setSavedQuestionIndex(0);
+    setSavedPartialAnswers(Array(16).fill(null));
+  };
+
+  // 質問画面の進行状態を保存（履歴画面に遷移する前に呼ばれる）
+  const handleSaveQuestionState = (index: number, partialAnswers: (number | null)[]) => {
+    setSavedQuestionIndex(index);
+    setSavedPartialAnswers(partialAnswers);
   };
 
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh'
-      }}>
+      <div className={styles.loadingContainer}>
         <div>データを送信中...</div>
       </div>
     );
@@ -168,112 +283,39 @@ function App() {
 
   if (error) {
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        minHeight: '100vh',
-        gap: '20px'
-      }}>
-        <div style={{ color: 'red' }}>エラー: {error}</div>
-        <button onClick={() => window.location.reload()}>
+      <div className={styles.errorContainer}>
+        <div className={styles.errorMessage}>エラー: {error}</div>
+        <button onClick={() => window.location.reload()} className={styles.reloadButton}>
           リロード
         </button>
       </div>
     );
   }
 
-  // ウェルカム画面
-  if (phase === "welcome") {
-    return (
-      <WelcomePage
-        onLoginClick={() => setPhase("login")}
-        onRegisterClick={() => setPhase("register")}
-        onGuestClick={() => setPhase("question")}
-        onLogout={() => {
-          logout();
-          window.location.reload();
-        }}
-        isAuthenticated={isAuthenticated}
-      />
-    );
-  }
-
-  // ログイン画面
-  if (phase === "login") {
-    return (
-      <LoginPage
-        onLoginSuccess={handleLoginSuccess}
-        onSwitchToRegister={() => setPhase("register")}
-      />
-    );
-  }
-
-  // 登録画面
-  if (phase === "register") {
-    return (
-      <RegisterPage
-        onRegisterSuccess={handleRegisterSuccess}
-        onSwitchToLogin={() => setPhase("login")}
-      />
-    );
-  }
-
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      {isAuthenticated && (
-        <div style={{
-          padding: '20px',
-          textAlign: 'right',
-          backgroundColor: '#fff',
-          borderBottom: '1px solid #ddd'
-        }}>
-          <button
-            onClick={logout}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#dc3545',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-            }}
-          >
-            ログアウト
-          </button>
-        </div>
-      )}
-      {phase === "question" && (
-        <QuestionPage onComplete={handleComplete} />
-      )}
-      {phase === "result" && (
-        <ResultPage
-          answers={answers}
-          neighborData={neighborData}
-          philoLabel={philoLabel}
-          showSaveOption={isAuthenticated}
-          onSave={handleSaveResult}
-          onSkip={handleSkipSave}
-          onBackToWelcome={() => {
-            setPhase("welcome");
-            setAnswers([]);
-            setNeighborData([]);
-            setAnswerID(null);
-            setPhiloLabel(null);
-          }}
-          onLogout={() => {
-            logout();
-            setPhase("welcome");
-            setAnswers([]);
-            setNeighborData([]);
-            setAnswerID(null);
-            setPhiloLabel(null);
-          }}
-          isAuthenticated={isAuthenticated}
-        />
-      )}
-    </div>
+    <AppRouter
+      phase={phase}
+      setPhase={setPhase}
+      isAuthenticated={isAuthenticated}
+      logout={logout}
+      getAuthHeaders={getAuthHeaders}
+      answers={answers}
+      neighborData={neighborData}
+      philoLabel={philoLabel}
+      categoryDistribution={categoryDistribution}
+      closestPhilosopher={closestPhilosopher}
+      handleLoginSuccess={handleLoginSuccess}
+      handleRegisterSuccess={handleRegisterSuccess}
+      handleComplete={handleComplete}
+      handleSaveResult={handleSaveResult}
+      handleSkipSave={handleSkipSave}
+      resetState={resetState}
+      savedQuestionIndex={savedQuestionIndex}
+      savedPartialAnswers={savedPartialAnswers}
+      onSaveQuestionState={handleSaveQuestionState}
+      previousPhase={previousPhase}
+      setPreviousPhase={setPreviousPhase}
+    />
   );
 }
 

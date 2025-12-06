@@ -51,14 +51,17 @@ func (h *Handler) RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	// ユーザー作成
-	user := &model.User{
-		Username: req.Username,
-		Email:    req.Email,
-		Password: string(hashedPassword),
-	}
+	// ユーザー作成（ポインタ型に変換）
+	email := req.Email
+	password := string(hashedPassword)
 	createdBy := "self"
-	user.CreatedBy = &createdBy
+
+	user := &model.User{
+		Username:  req.Username,
+		Email:     &email,
+		Password:  &password,
+		CreatedBy: &createdBy,
+	}
 
 	if err := h.userRepo.Create(user); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
@@ -92,8 +95,13 @@ func (h *Handler) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	// パスワード検証
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
+	// パスワード検証（Google OAuth認証のみのユーザーはパスワードがNULL）
+	if user.Password == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "This account uses Google login. Please sign in with Google."})
+		return
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(*user.Password), []byte(req.Password)); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}

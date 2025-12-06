@@ -1,4 +1,6 @@
 import React from 'react';
+import CategoryDistributionGrid from './charts/CategoryDistributionGrid';
+import { typeDescriptions } from '../data/typeDescriptions';
 
 type NeighborData = {
   radius: number;
@@ -27,10 +29,57 @@ type PhiloLabel = {
   sub_scores: SubIndicators;
 };
 
+type DataPoint = {
+  score: number;
+  count: number;
+};
+
+type CategoryDistributionData = {
+  logic: DataPoint[];
+  ethics: DataPoint[];
+  aesthetics: DataPoint[];
+  postmodern: DataPoint[];
+};
+
+type Philosopher = {
+  id: number;
+  name: string;
+  era: string;
+  description: string;
+  answer_01: number;
+  answer_02: number;
+  answer_03: number;
+  answer_04: number;
+  answer_05: number;
+  answer_06: number;
+  answer_07: number;
+  answer_08: number;
+  answer_09: number;
+  answer_10: number;
+  answer_11: number;
+  answer_12: number;
+  answer_13: number;
+  answer_14: number;
+  answer_15: number;
+  answer_16: number;
+  deleted: boolean;
+  created_at: string;
+  created_by?: string;
+  updated_at?: string;
+  updated_by?: string;
+};
+
+type ClosestPhilosopher = {
+  philosopher: Philosopher;
+  distance: number;
+};
+
 type Props = {
   answers: number[];
   neighborData: NeighborData[];
   philoLabel: PhiloLabel | null;
+  categoryDistribution: CategoryDistributionData | null;
+  closestPhilosopher: ClosestPhilosopher | null;
   onSave?: () => void;
   onSkip?: () => void;
   showSaveOption?: boolean;
@@ -39,7 +88,7 @@ type Props = {
   isAuthenticated?: boolean;
 };
 
-const ResultPage: React.FC<Props> = ({ answers, neighborData, philoLabel, onSave, onSkip, showSaveOption = false, onBackToWelcome, onLogout, isAuthenticated = false }) => {
+const ResultPage: React.FC<Props> = ({ answers, neighborData, philoLabel, categoryDistribution, closestPhilosopher, onSave, onSkip, showSaveOption = false, onBackToWelcome, onLogout, isAuthenticated = false }) => {
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
       <h1 style={{ textAlign: 'center', marginBottom: '40px' }}>
@@ -155,6 +204,105 @@ const ResultPage: React.FC<Props> = ({ answers, neighborData, philoLabel, onSave
             </div>
           </div>
         </div>
+      )}
+
+      {/* 最近傍哲学者 */}
+      {closestPhilosopher && (
+        <div style={{
+          backgroundColor: 'white',
+          padding: '30px',
+          borderRadius: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          marginBottom: '30px',
+          border: '2px solid #ff9800',
+        }}>
+          <h2 style={{ marginBottom: '20px', fontSize: '20px', color: '#ff9800', textAlign: 'center' }}>
+            あなたに最も近い哲学者
+          </h2>
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <div style={{ fontSize: '32px', fontWeight: 'bold', color: '#333', marginBottom: '8px' }}>
+              {closestPhilosopher.philosopher.name}
+            </div>
+            <div style={{ fontSize: '16px', color: '#666', marginBottom: '4px' }}>
+              {closestPhilosopher.philosopher.era}
+            </div>
+            <div style={{ fontSize: '14px', color: '#999', marginTop: '12px' }}>
+              {closestPhilosopher.philosopher.description}
+            </div>
+          </div>
+          <div style={{
+            marginTop: '20px',
+            padding: '16px',
+            backgroundColor: '#fff3e0',
+            borderRadius: '4px',
+            textAlign: 'center',
+          }}>
+            <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>
+              あなたとの距離
+            </div>
+            <div style={{ fontSize: '28px', fontWeight: 'bold', color: '#ff9800' }}>
+              {closestPhilosopher.distance.toFixed(2)}
+            </div>
+            <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
+              16次元空間上のユークリッド距離
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* タイプ説明 */}
+      {philoLabel && typeDescriptions[philoLabel.main_label] && (
+        <div style={{
+          backgroundColor: 'white',
+          padding: '30px',
+          borderRadius: '8px',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          marginBottom: '30px',
+        }}>
+          <h2 style={{ marginBottom: '20px', fontSize: '20px', color: '#333' }}>
+            {philoLabel.main_label}タイプの特徴
+          </h2>
+          <div style={{ lineHeight: '1.8' }}>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>構成:</div>
+              <div style={{ fontSize: '16px', color: '#333' }}>
+                {typeDescriptions[philoLabel.main_label].composition}
+              </div>
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>傾向:</div>
+              <div style={{ fontSize: '16px', color: '#333' }}>
+                {typeDescriptions[philoLabel.main_label].tendency}
+              </div>
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>長所:</div>
+              <div style={{ fontSize: '16px', color: '#4caf50' }}>
+                {typeDescriptions[philoLabel.main_label].strengths}
+              </div>
+            </div>
+            <div style={{ marginBottom: '16px' }}>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>弱点:</div>
+              <div style={{ fontSize: '16px', color: '#f44336' }}>
+                {typeDescriptions[philoLabel.main_label].weaknesses}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: '14px', color: '#666', marginBottom: '4px' }}>距離:</div>
+              <div style={{ fontSize: '16px', color: '#333' }}>
+                {typeDescriptions[philoLabel.main_label].distance}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* カテゴリ別スコア分布グラフ */}
+      {categoryDistribution && philoLabel && (
+        <CategoryDistributionGrid
+          data={categoryDistribution}
+          userScores={philoLabel.category_scores}
+        />
       )}
 
       <div style={{
