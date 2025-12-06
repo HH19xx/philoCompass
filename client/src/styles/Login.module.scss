@@ -1,38 +1,38 @@
 .loginContainer {
   max-width: 400px;
   margin: 0 auto;
-  padding: 40px;
-  background: #f9f9f9;
+  padding: var(--spacing-10);
+  background: var(--color-surface-container);
   border-radius: 12px;
-  box-shadow: 0 2px 12px #0001;
+  box-shadow: var(--shadow-sm);
 }
 
 .loginTitle {
-  margin-bottom: 24px;
-  font-size: 2rem;
+  margin-bottom: var(--spacing-6);
+  font-size: var(--font-size-2xl);
 }
 
 .loginForm label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-2);
   font-weight: bold;
 }
 
 .loginForm input {
   width: 100%;
-  margin-bottom: 12px;
-  padding: 8px;
+  margin-bottom: var(--spacing-3);
+  padding: var(--spacing-2);
   border-radius: 4px;
-  border: 1px solid #bbb;
+  border: 1px solid var(--color-outline-input);
 }
 
 .loginButton {
   width: 100%;
-  padding: 10px;
+  padding: var(--spacing-2-5);
   border-radius: 4px;
   border: none;
-  background: #008080;
-  color: #fff;
-  font-size: 1.1rem;
+  background: var(--color-teal);
+  color: var(--color-on-primary);
+  font-size: var(--font-size-lg);
   cursor: pointer;
 }

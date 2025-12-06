@@ -1,0 +1,82 @@
+// CSS変数定義
+
+:root {
+  // カラー - プライマリ
+  --color-primary: #007bff;
+  --color-primary-hover: #0056b3;
+  --color-on-primary: white;
+  
+  // カラー - サクセス
+  --color-success: #28a745;
+  --color-success-hover: #218838;
+  --color-success-hover-2: #1e7e34;
+  --color-on-success: white;
+  
+  // カラー - デンジャー
+  --color-danger: #dc3545;
+  --color-danger-hover: #c82333;
+  --color-on-danger: white;
+  
+  // カラー - セカンダリ
+  --color-secondary-container: #6c757d;
+  --color-secondary-container-hover: #5a6268;
+  --color-on-secondary-container: white;
+  
+  // カラー - Google
+  --color-google: #4285f4;
+  --color-google-hover: #357ae8;
+  
+  // カラー - その他
+  --color-teal: #008080;
+  
+  // サーフェス
+  --color-surface: #f5f5f5;
+  --color-surface-container: #f9f9f9;
+  --color-surface-alt: #eef7f6;
+  --color-surface-high: white;
+  --color-on-surface: #333;
+  --color-on-surface-variant: #666;
+  --color-on-surface-muted: #999;
+  --color-on-surface-subtle: #888;
+  
+  // アウトライン
+  --color-outline: #ddd;
+  --color-outline-variant: #e0e0e0;
+  --color-outline-input: #bbb;
+  
+  // ホバー背景
+  --color-hover-success: #f0f8f0;
+  
+  // エラー
+  --color-error: red;
+  
+  // シャドウ
+  --shadow-sm: 0 2px 12px #0001;
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-auth: 0 2px 10px rgba(0, 0, 0, 0.1);
+  
+  // フォントサイズ
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 1.1rem;
+  --font-size-xl: 20px;
+  --font-size-2xl: 2rem;
+  --font-size-3xl: 32px;
+  
+  // 間隔
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-2-5: 10px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 30px;
+  --spacing-10: 40px;
+  
+  // アニメーション
+  --duration-normal: 0.2s;
+  --duration-slow: 0.3s;
+}

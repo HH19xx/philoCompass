@@ -4,6 +4,7 @@ CREATE TABLE "user" (
     email           VARCHAR(255) UNIQUE,                      -- OAuth認証時はNULLの可能性あり
     password        VARCHAR(255),                             -- OAuth認証時はNULLの可能性あり
     google_id       VARCHAR(255) UNIQUE,                      -- Google OAuthのユーザーID
+    theme_settings  JSONB DEFAULT NULL,                       -- テーマ設定（将来の機能用）
     deleted         BOOLEAN DEFAULT FALSE NOT NULL,
     created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by      VARCHAR(50),

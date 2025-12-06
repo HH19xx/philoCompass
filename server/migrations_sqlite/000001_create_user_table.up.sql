@@ -3,6 +3,7 @@ CREATE TABLE "user" (
     username        TEXT NOT NULL UNIQUE,
     email           TEXT NOT NULL UNIQUE,
     password        TEXT NOT NULL,
+    theme_settings  TEXT DEFAULT NULL,                        -- テーマ設定（JSON形式、将来の機能用）
     deleted         INTEGER DEFAULT 0 NOT NULL,
     created_at      DATETIME NOT NULL DEFAULT (DATETIME('now')),
     created_by      TEXT,
