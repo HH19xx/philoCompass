@@ -49,7 +49,7 @@ jobs:
             --platform managed \
             --allow-unauthenticated \
             --port 8081 \
-            --set-env-vars APP_ENV=production,DB_TYPE=postgres,DB_SSLMODE=require,FRONTEND_URL=${{ secrets.FRONTEND_URL }},JWT_SECRET=${{ secrets.JWT_SECRET }},DB_HOST=${{ secrets.SUPABASE_DB_HOST }},DB_PORT=${{ secrets.SUPABASE_DB_PORT }},DB_USER=${{ secrets.SUPABASE_DB_USER }},DB_PASSWORD=${{ secrets.SUPABASE_DB_PASSWORD }},DB_NAME=${{ secrets.SUPABASE_DB_NAME }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }},GOOGLE_REDIRECT_URL=${{ secrets.GOOGLE_REDIRECT_URL }}
+            --set-env-vars APP_ENV=production,DB_TYPE=postgres,DB_SSLMODE=require,FRONTEND_URL=${{ secrets.FRONTEND_URL }},JWT_SECRET=${{ secrets.JWT_SECRET }},DB_HOST=${{ secrets.DB_HOST }},DB_PORT=${{ secrets.DB_PORT }},DB_USER=${{ secrets.DB_USER }},DB_PASSWORD=${{ secrets.DB_PASSWORD }},DB_NAME=${{ secrets.DB_NAME }},GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }},GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }},GOOGLE_REDIRECT_URL=${{ secrets.GOOGLE_REDIRECT_URL }}
 
   frontend:
     name: Deploy Frontend
