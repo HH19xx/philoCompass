@@ -76,6 +76,11 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onSwitch
     }
   };
 
+    // 登録せずに戻る場合のハンドラ
+  const handleCancel = () => {
+    onSwitchToLogin();
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.card}>
@@ -148,6 +153,9 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onSwitch
           <span className={styles.footerText}>既にアカウントをお持ちですか？ </span>
           <button onClick={onSwitchToLogin} className={styles.switchLink}>
             ログイン
+          </button>
+          <button type="button" onClick={handleCancel} className={styles.cancelButton}>
+            戻る
           </button>
         </div>
       </div>

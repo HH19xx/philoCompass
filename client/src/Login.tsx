@@ -12,6 +12,11 @@ function Login() {
     navigate("/dashboard", { state: { username } });
   };
 
+  // ログインせずに戻る場合のハンドラ
+  const handleCancel = () => {
+    navigate("/");
+  };
+
   return (
     <div className={styles.loginContainer}>
       <h2 className={styles.loginTitle}>ログイン</h2>
@@ -34,6 +39,9 @@ function Login() {
         </label>
         <button className={styles.loginButton} type="submit">
           ログイン
+        </button>
+        <button type="button" onClick={handleCancel} className={styles.cancelButton}>
+          キャンセル
         </button>
       </form>
     </div>
