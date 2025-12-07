@@ -4,9 +4,10 @@ import styles from '../styles/Auth.module.scss';
 interface RegisterPageProps {
   onRegisterSuccess: (token: string, user: { id: number; username: string; email: string }) => void;
   onSwitchToLogin: () => void;
+  onBackToWelcome?: () => void;
 }
 
-const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onSwitchToLogin }) => {
+const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onSwitchToLogin, onBackToWelcome }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -78,7 +79,11 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onSwitch
 
     // 登録せずに戻る場合のハンドラ
   const handleCancel = () => {
-    onSwitchToLogin();
+    if (onBackToWelcome) {
+      onBackToWelcome();
+    } else {
+      onSwitchToLogin();
+    }
   };
 
   return (

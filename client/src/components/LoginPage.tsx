@@ -4,9 +4,10 @@ import styles from '../styles/Auth.module.scss';
 interface LoginPageProps {
   onLoginSuccess: (token: string, user: { id: number; username: string; email: string }) => void;
   onSwitchToRegister: () => void;
+  onBackToWelcome?: () => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegister }) => {
+const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegister, onBackToWelcome }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -42,6 +43,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegiste
       setError(err instanceof Error ? err.message : 'ログインに失敗しました');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // ログインせずに戻る場合のハンドラ
+  const handleCancel = () => {
+    if (onBackToWelcome) {
+      onBackToWelcome();
     }
   };
 
@@ -92,6 +100,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegiste
           <span className={styles.footerText}>アカウントをお持ちでないですか？ </span>
           <button onClick={onSwitchToRegister} className={styles.switchLink}>
             新規登録
+          </button>
+          <button type="button" onClick={handleCancel} className={styles.cancelButton}>
+            戻る
           </button>
         </div>
       </div>

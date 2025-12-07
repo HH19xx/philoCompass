@@ -174,6 +174,7 @@ function AppRouter({
         <LoginPage
           onLoginSuccess={handleLoginSuccess}
           onSwitchToRegister={() => setPhase("register")}
+          onBackToWelcome={handleBackToWelcome}
         />
       );
 
@@ -182,6 +183,7 @@ function AppRouter({
         <RegisterPage
           onRegisterSuccess={handleRegisterSuccess}
           onSwitchToLogin={() => setPhase("login")}
+          onBackToWelcome={handleBackToWelcome}
         />
       );
 
