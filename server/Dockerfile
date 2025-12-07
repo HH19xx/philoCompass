@@ -10,8 +10,12 @@ RUN apk add --no-cache gcc musl-dev
 COPY go.mod go.sum* ./
 RUN go mod download
 
-# ソースコードのコピー
-COPY . .
+# ソースコードのコピー（必要なディレクトリを明示）
+COPY cmd ./cmd
+COPY internal ./internal
+COPY migrations_postgres ./migrations_postgres
+COPY migrations_sqlite ./migrations_sqlite
+COPY tools ./tools
 
 # バイナリのビルド（CGO_ENABLED=1に変更してSQLiteをサポート）
 RUN CGO_ENABLED=1 GOOS=linux go build -o server ./cmd/server
