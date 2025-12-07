@@ -73,6 +73,17 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Prepare Vercel project config
+        working-directory: client
+        run: |
+          mkdir -p .vercel
+          cat > .vercel/project.json <<'EOF'
+          {
+            "projectId": "${{ secrets.VERCEL_PROJECT_ID }}",
+            "orgId": "${{ secrets.VERCEL_ORG_ID }}"
+          }
+          EOF
+
       - name: Install dependencies
         working-directory: client
         run: npm ci
@@ -87,5 +98,5 @@ jobs:
           npm install -g vercel
           vercel --prod \
             --token ${{ secrets.VERCEL_TOKEN }} \
-            --project ${{ secrets.VERCEL_PROJECT_ID }} \
+            --yes \
             --confirm
