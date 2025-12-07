@@ -20,6 +20,7 @@ type Config struct {
 	DBUser             string
 	DBPassword         string
 	DBName             string
+	DBSSLMode          string // PostgreSQL SSL mode
 	ServerPort         string
 	AppEnv             string // "development" or "production"
 	FrontendURL        string // フロントエンドのURL
@@ -37,6 +38,7 @@ func LoadConfig() *Config {
 		DBUser:             getEnv("DB_USER", "philobot_user"),
 		DBPassword:         getEnv("DB_PASSWORD", "strongpassword"),
 		DBName:             getEnv("DB_NAME", "philobot"),
+		DBSSLMode:          getEnv("DB_SSLMODE", "require"), // Supabase想定でデフォルトrequire
 		ServerPort:         getEnv("PORT", "8081"),
 		AppEnv:             getEnv("APP_ENV", "development"),
 		FrontendURL:        getEnv("FRONTEND_URL", "http://localhost:5173"),
@@ -85,8 +87,8 @@ func ConnectSQLite(cfg *Config) (*sql.DB, error) {
 // ConnectPostgreSQL PostgreSQLデータベースに接続（環境変数でSQLiteかどちらかを選択）
 func ConnectPostgreSQL(cfg *Config) (*sql.DB, error) {
 	dsn := fmt.Sprintf(
-		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName,
+		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBSSLMode,
 	)
 
 	var db *sql.DB
