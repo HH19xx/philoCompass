@@ -1,40 +1,11 @@
-name: Frontend CI/CD
+name: Frontend CI/CD (disabled)
 
 on:
   push:
-    branches: [ release1.0 ]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend.yml'
+    branches: [ __disabled__ ]
 
 jobs:
-  build-and-deploy:
+  noop:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Use Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        working-directory: ./frontend
-        run: npm ci
-
-      - name: Run tests
-        working-directory: ./frontend
-        run: npm test -- --watch=false || echo "no tests"
-
-      - name: Build
-        working-directory: ./frontend
-        run: npm run build
-
-      - name: Deploy to Vercel
-        working-directory: ./frontend
-        run: |
-          npx vercel --prod \
-            --token ${{ secrets.VERCEL_TOKEN }} \
-            --yes
+      - run: echo "frontend.yml disabled; use release.yml"
