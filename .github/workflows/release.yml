@@ -74,13 +74,12 @@ jobs:
         run: npm run build
 
       - name: Deploy to Vercel (prod)
-        working-directory: client
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           npm install -g vercel
+          cd client
           vercel pull --yes --environment=production --token=$VERCEL_TOKEN
-          sed -i 's/"outputDirectory": "dist\/client"/"outputDirectory": "dist"/g' .vercel/project.json
-          vercel deploy ./dist --prod --token=$VERCEL_TOKEN
+          vercel deploy --prod --token=$VERCEL_TOKEN
