@@ -81,8 +81,4 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           npm install -g vercel
-          vercel --prod \
-            --token "$VERCEL_TOKEN" \
-            ${VERCEL_ORG_ID:+--scope "$VERCEL_ORG_ID"} \
-            --project "$VERCEL_PROJECT_ID" \
-            --yes
+          vercel --prod --yes
