@@ -55,8 +55,16 @@ jobs:
     name: Deploy Frontend
     runs-on: ubuntu-latest
     needs: backend
+    # 環境Secretsを使っている場合は下記をアンコメントして環境名を指定
+    # environment: production
 
     steps:
+      - name: Check Vercel secrets
+        run: |
+          [ -n "${{ secrets.VERCEL_TOKEN }}" ] || (echo "VERCEL_TOKEN is empty" && exit 1)
+          [ -n "${{ secrets.VERCEL_ORG_ID }}" ] || (echo "VERCEL_ORG_ID is empty" && exit 1)
+          [ -n "${{ secrets.VERCEL_PROJECT_ID }}" ] || (echo "VERCEL_PROJECT_ID is empty" && exit 1)
+
       - name: Checkout
         uses: actions/checkout@v4
 
