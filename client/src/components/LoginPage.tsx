@@ -101,7 +101,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onSwitchToRegiste
           <button onClick={onSwitchToRegister} className={styles.switchLink}>
             新規登録
           </button>
-          <button type="button" onClick={handleCancel} className={styles.cancelButton}>
+        </div>
+        <div>
+          <button type="button" onClick={handleCancel} className={styles.switchLink}>
             戻る
           </button>
         </div>

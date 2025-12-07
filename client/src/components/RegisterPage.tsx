@@ -159,7 +159,9 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onSwitch
           <button onClick={onSwitchToLogin} className={styles.switchLink}>
             ログイン
           </button>
-          <button type="button" onClick={handleCancel} className={styles.cancelButton}>
+        </div>
+        <div>
+          <button type="button" onClick={handleCancel} className={styles.switchLink}>
             戻る
           </button>
         </div>
