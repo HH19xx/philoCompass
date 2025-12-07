@@ -1,0 +1,40 @@
+name: Database Migration
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'server/migrations_postgres/**'
+      - '.github/workflows/database-migration.yml'
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Run migrations
+        env:
+          PGHOST: ${{ secrets.DB_HOST }}
+          PGPORT: ${{ secrets.DB_PORT }}
+          PGUSER: ${{ secrets.DB_USER }}
+          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+          PGDATABASE: ${{ secrets.DB_NAME }}
+        run: |
+          # migrations_postgresディレクトリ内の.up.sqlファイルを順番に実行
+          cd server/migrations_postgres
+          for file in $(ls *.up.sql | sort); do
+            echo "Executing migration: $file"
+            psql -f "$file"
+          done
+
+      - name: Notify migration complete
+        if: success()
+        run: echo "Database migration completed successfully"
