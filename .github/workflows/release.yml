@@ -55,16 +55,8 @@ jobs:
     name: Deploy Frontend
     runs-on: ubuntu-latest
     needs: backend
-    # 環境Secretsを使っている場合は下記をアンコメントして環境名を指定
-    # environment: production
 
     steps:
-      - name: Check Vercel secrets
-        run: |
-          [ -n "${{ secrets.VERCEL_TOKEN }}" ] || (echo "VERCEL_TOKEN is empty" && exit 1)
-          [ -n "${{ secrets.VERCEL_ORG_ID }}" ] || (echo "VERCEL_ORG_ID is empty" && exit 1)
-          [ -n "${{ secrets.VERCEL_PROJECT_ID }}" ] || (echo "VERCEL_PROJECT_ID is empty" && exit 1)
-
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -72,17 +64,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-
-      - name: Prepare Vercel project config
-        working-directory: client
-        run: |
-          rm -rf .vercel
-          mkdir -p .vercel
-          cat > .vercel/project.json <<'EOF'
-          {
-            "projectId": "${{ secrets.VERCEL_PROJECT_ID }}"
-          }
-          EOF
 
       - name: Install dependencies
         working-directory: client
@@ -94,9 +75,15 @@ jobs:
 
       - name: Deploy to Vercel (prod)
         working-directory: client
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
           npm install -g vercel
-          vercel --prod \
-            --token ${{ secrets.VERCEL_TOKEN }} \
-            --yes \
-            --confirm
+          SCOPE_ARG=""
+          if [ -n "$VERCEL_ORG_ID" ]; then
+            SCOPE_ARG="--scope $VERCEL_ORG_ID"
+          fi
+          vercel pull --yes --environment=production --token "$VERCEL_TOKEN" --project "$VERCEL_PROJECT_ID" $SCOPE_ARG
+          vercel deploy --prebuilt --prod --yes --token "$VERCEL_TOKEN" $SCOPE_ARG
