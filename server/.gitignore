@@ -1,0 +1,33 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/server/server
+*.test
+*.out
+
+# Go workspace file
+go.work
+
+# Environment variables
+.env
+.env*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# SQLiteデータベースファイル
+data/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+.gitignore
+.dockerignore
