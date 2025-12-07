@@ -11,9 +11,11 @@ interface WelcomePageProps {
 }
 
 const WelcomePage: React.FC<WelcomePageProps> = ({ onLoginClick, onRegisterClick, onGuestClick, onHistoryClick: _onHistoryClick, onLogout, isAuthenticated = false }) => {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081';
+
   // Google OAuth認証を開始
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8081/api/auth/google';
+    window.location.href = `${API_URL}/api/auth/google`;
   };
 
   return (

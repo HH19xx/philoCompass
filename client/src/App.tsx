@@ -171,7 +171,7 @@ function App() {
 
     try {
       // 回答を匿名で保存（認証不要）
-      const response = await fetch("http://localhost:8081/api/answers", {
+      const response = await fetch(`${API_URL}/api/answers`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -190,7 +190,7 @@ function App() {
       setAnswerID(savedAnswerID);
 
       // 近傍ユーザー数の分布を取得（認証不要）
-      const statsResponse = await fetch(`http://localhost:8081/api/statistics/distribution/${savedAnswerID}`);
+      const statsResponse = await fetch(`${API_URL}/api/statistics/distribution/${savedAnswerID}`);
       if (!statsResponse.ok) {
         throw new Error("統計データの取得に失敗しました");
       }
@@ -201,7 +201,7 @@ function App() {
       setClosestPhilosopher(statsData.closest_philosopher);
 
       // カテゴリ別スコア分布を取得（認証不要）
-      const categoryResponse = await fetch(`http://localhost:8081/api/statistics/category-distribution/${savedAnswerID}`);
+      const categoryResponse = await fetch(`${API_URL}/api/statistics/category-distribution/${savedAnswerID}`);
       if (!categoryResponse.ok) {
         throw new Error("カテゴリ分布データの取得に失敗しました");
       }
@@ -226,7 +226,7 @@ function App() {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:8081/api/answers/link", {
+      const response = await fetch(`${API_URL}/api/answers/link`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

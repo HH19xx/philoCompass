@@ -14,6 +14,8 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onSwitch
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081';
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -31,7 +33,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onSwitch
     setIsLoading(true);
 
     try {
-      const registerResponse = await fetch('http://localhost:8081/api/register', {
+      const registerResponse = await fetch(`${API_URL}/api/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,7 +51,7 @@ const RegisterPage: React.FC<RegisterPageProps> = ({ onRegisterSuccess, onSwitch
         throw new Error(registerData.error || '登録に失敗しました');
       }
 
-      const loginResponse = await fetch('http://localhost:8081/api/login', {
+      const loginResponse = await fetch(`${API_URL}/api/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -71,6 +71,8 @@ jobs:
 
       - name: Build
         working-directory: client
+        env:
+          VITE_API_URL: https://philocompass-api-69135860626.asia-northeast1.run.app
         run: npm run build
 
       - name: Deploy to Vercel (prod)
