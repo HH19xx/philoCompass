@@ -10,7 +10,7 @@ interface WelcomePageProps {
   isAuthenticated?: boolean;
 }
 
-const WelcomePage: React.FC<WelcomePageProps> = ({ onLoginClick, onRegisterClick, onGuestClick, onHistoryClick, onLogout, isAuthenticated = false }) => {
+const WelcomePage: React.FC<WelcomePageProps> = ({ onLoginClick, onRegisterClick, onGuestClick, onHistoryClick: _onHistoryClick, onLogout, isAuthenticated = false }) => {
   // Google OAuth認証を開始
   const handleGoogleLogin = () => {
     window.location.href = 'http://localhost:8081/api/auth/google';
