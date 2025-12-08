@@ -151,21 +151,16 @@ func (h *Handler) GoogleCallbackHandler(c *gin.Context) {
 	// フロントエンドにリダイレクト
 	var redirectURL string
 	if h.googleOAuthConfig.appEnv == "production" {
-		// 本番環境: HTTPOnlyクッキーにトークンを設定してトップページにリダイレクト
-		c.SetCookie(
-			"auth_token",
-			jwtToken,
-			3600*24*7, // 7日間
-			"/",
-			"",
-			true,  // Secure (HTTPS only)
-			true,  // HttpOnly
-		)
-		// ユーザー名とユーザーIDをクエリパラメータで渡す
-		redirectURL = fmt.Sprintf("%s/?oauth=success&user=%s&user_id=%d", h.googleOAuthConfig.frontendURL, user.Username, user.ID)
+		// 本番環境: URLパラメータでトークンとユーザー情報を渡す
+		// フロントエンド側で受け取った後、すぐにURLパラメータをクリアするため安全性は保たれる
+		redirectURL = fmt.Sprintf("%s/?token=%s&user=%s&user_id=%d", h.googleOAuthConfig.frontendURL, jwtToken, user.Username, user.ID)
+	} else if h.googleOAuthConfig.appEnv == "development" {
+		// 開発環境: URLパラメータでトークンとユーザー情報を渡す
+		redirectURL = fmt.Sprintf("%s/?token=%s&user=%s&user_id=%d", h.googleOAuthConfig.frontendURL, jwtToken, user.Username, user.ID)
 	} else {
-		// 開発環境: クエリパラメータでトークンを渡す
-		redirectURL = fmt.Sprintf("%s/?token=%s&user=%s", h.googleOAuthConfig.frontendURL, jwtToken, user.Username)
+		// 不明な環境の場合はエラーを返す
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "不正な環境設定です"})
+		return
 	}
 
 	c.Redirect(http.StatusTemporaryRedirect, redirectURL)

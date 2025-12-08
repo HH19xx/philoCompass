@@ -97,7 +97,6 @@ function App() {
 
   // 環境変数から設定を取得
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8081';
-  const APP_ENV = import.meta.env.VITE_APP_ENV || 'development';
 
   // バックエンド疎通確認（/api/hello）
   useEffect(() => {
@@ -116,61 +115,27 @@ function App() {
   // Google OAuthコールバック処理（URLパラメータからトークンを取得）
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const oauthSuccess = urlParams.get('oauth');
     const token = urlParams.get('token');
     const username = urlParams.get('user');
     const userIdStr = urlParams.get('user_id');
 
-    // 本番環境: クッキーからトークンを取得
-    if (oauthSuccess === 'success' && username && userIdStr) {
-      // クッキーからauth_tokenを取得
-      const cookies = document.cookie.split(';');
-      let authToken = '';
-
-      for (const cookie of cookies) {
-        const [name, value] = cookie.trim().split('=');
-        if (name === 'auth_token') {
-          authToken = value;
-          break;
-        }
-      }
-
-      if (authToken) {
-        const user = {
-          id: parseInt(userIdStr, 10),
-          username: username,
-          email: '',
-        };
-
-        login(authToken, user);
-
-        // URLパラメータをクリア
-        window.history.replaceState({}, document.title, window.location.pathname);
-
-        // 質問ページに遷移
-        setPhase('question');
-      } else {
-        console.error('クッキーからトークンを取得できませんでした');
-        setError('認証エラー: トークンが見つかりません');
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    } else if (token && username) {
-      // 開発環境: URLパラメータでのトークン受け渡し
+    // URLパラメータにトークンとユーザー情報が含まれている場合
+    if (token && username && userIdStr) {
       const user = {
-        id: 0, // 開発環境用の仮ID
+        id: parseInt(userIdStr, 10),
         username: username,
         email: '',
       };
 
       login(token, user);
 
-      // URLパラメータをクリア
+      // URLパラメータをクリア（セキュリティのため）
       window.history.replaceState({}, document.title, window.location.pathname);
 
       // 質問ページに遷移
       setPhase('question');
     }
-  }, [login, APP_ENV]);
+  }, [login]);
 
   // ログイン成功時の処理
   const handleLoginSuccess = (token: string, user: { id: number; username: string; email: string }) => {
