@@ -116,38 +116,59 @@ function App() {
   // Google OAuthコールバック処理（URLパラメータからトークンを取得）
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
+    const oauthSuccess = urlParams.get('oauth');
     const token = urlParams.get('token');
     const username = urlParams.get('user');
+    const userIdStr = urlParams.get('user_id');
 
-    if (token && username) {
-      // 開発環境のみURLパラメータでのトークン受け渡しを許可
-      if (APP_ENV === 'development') {
-        const mockUser = {
-          id: 0, // 開発環境用の仮ID
+    // 本番環境: クッキーからトークンを取得
+    if (oauthSuccess === 'success' && username && userIdStr) {
+      // クッキーからauth_tokenを取得
+      const cookies = document.cookie.split(';');
+      let authToken = '';
+
+      for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split('=');
+        if (name === 'auth_token') {
+          authToken = value;
+          break;
+        }
+      }
+
+      if (authToken) {
+        const user = {
+          id: parseInt(userIdStr, 10),
           username: username,
           email: '',
         };
 
-        login(token, mockUser);
+        login(authToken, user);
 
         // URLパラメータをクリア
         window.history.replaceState({}, document.title, window.location.pathname);
 
         // 質問ページに遷移
         setPhase('question');
-      } else if (APP_ENV === 'production') {
-        // 本番環境ではURLパラメータからのトークン取得を拒否
-        console.error('本番環境ではURLパラメータによるトークン受け渡しは禁止されています');
-        setError('認証エラー: 不正なアクセス方法です');
-
-        // URLパラメータをクリアしてトップページに戻す
-        window.history.replaceState({}, document.title, window.location.pathname);
       } else {
-        // 未知の環境の場合も拒否
-        console.error('不明な環境設定です');
-        setError('認証エラー: 環境設定が不正です');
+        console.error('クッキーからトークンを取得できませんでした');
+        setError('認証エラー: トークンが見つかりません');
         window.history.replaceState({}, document.title, window.location.pathname);
       }
+    } else if (token && username) {
+      // 開発環境: URLパラメータでのトークン受け渡し
+      const user = {
+        id: 0, // 開発環境用の仮ID
+        username: username,
+        email: '',
+      };
+
+      login(token, user);
+
+      // URLパラメータをクリア
+      window.history.replaceState({}, document.title, window.location.pathname);
+
+      // 質問ページに遷移
+      setPhase('question');
     }
   }, [login, APP_ENV]);
 

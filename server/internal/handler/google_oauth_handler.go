@@ -151,7 +151,7 @@ func (h *Handler) GoogleCallbackHandler(c *gin.Context) {
 	// フロントエンドにリダイレクト
 	var redirectURL string
 	if h.googleOAuthConfig.appEnv == "production" {
-		// 本番環境: HTTPOnlyクッキーにトークンを設定してリダイレクト
+		// 本番環境: HTTPOnlyクッキーにトークンを設定してトップページにリダイレクト
 		c.SetCookie(
 			"auth_token",
 			jwtToken,
@@ -161,11 +161,12 @@ func (h *Handler) GoogleCallbackHandler(c *gin.Context) {
 			true,  // Secure (HTTPS only)
 			true,  // HttpOnly
 		)
-		redirectURL = fmt.Sprintf("%s/auth/callback?user=%s", h.googleOAuthConfig.frontendURL, user.Username)
+		// ユーザー名とユーザーIDをクエリパラメータで渡す
+		redirectURL = fmt.Sprintf("%s/?oauth=success&user=%s&user_id=%d", h.googleOAuthConfig.frontendURL, user.Username, user.ID)
 	} else {
 		// 開発環境: クエリパラメータでトークンを渡す
-		redirectURL = fmt.Sprintf("%s/auth/callback?token=%s&user=%s", h.googleOAuthConfig.frontendURL, jwtToken, user.Username)
+		redirectURL = fmt.Sprintf("%s/?token=%s&user=%s", h.googleOAuthConfig.frontendURL, jwtToken, user.Username)
 	}
-	
+
 	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
