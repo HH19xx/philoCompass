@@ -3,8 +3,6 @@
   "outputDirectory": "dist",
   "installCommand": "npm ci",
   "git": {
-    "deploymentEnabled": {
-      "release1.0": true
-    }
+    "deploymentEnabled": false
   }
 }
