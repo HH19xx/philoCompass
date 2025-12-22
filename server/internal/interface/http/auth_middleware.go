@@ -1,20 +1,20 @@
-package middleware
+package http
 
 import (
-	"net/http"
+	nethttp "net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/HH19xx/philoCompass/internal/service"
+	"github.com/HH19xx/philoCompass/internal/usecase"
 )
 
 // AuthMiddleware JWT認証ミドルウェア
-func AuthMiddleware(authService *service.AuthService) gin.HandlerFunc {
+func AuthMiddleware(authService *usecase.AuthService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Authorizationヘッダーからトークン取得
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
+			c.JSON(nethttp.StatusUnauthorized, gin.H{"error": "Authorization header required"})
 			c.Abort()
 			return
 		}
@@ -22,7 +22,7 @@ func AuthMiddleware(authService *service.AuthService) gin.HandlerFunc {
 		// "Bearer "プレフィックスを除去
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 		if tokenString == authHeader {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization format"})
+			c.JSON(nethttp.StatusUnauthorized, gin.H{"error": "Invalid authorization format"})
 			c.Abort()
 			return
 		}
@@ -30,7 +30,7 @@ func AuthMiddleware(authService *service.AuthService) gin.HandlerFunc {
 		// トークン検証
 		claims, err := authService.ValidateToken(tokenString)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			c.JSON(nethttp.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			c.Abort()
 			return
 		}

@@ -1,21 +1,21 @@
-package repository
+package db
 
 import (
 	"database/sql"
 	"fmt"
 
-	"github.com/HH19xx/philoCompass/internal/model"
+	"github.com/HH19xx/philoCompass/internal/domain"
 )
 
 type UserRepository interface {
-	Create(user *model.User) error
-	FindByID(id int) (*model.User, error)
-	FindByUsername(username string) (*model.User, error)
-	FindByEmail(email string) (*model.User, error)
-	Update(user *model.User) error
+	Create(user *domain.User) error
+	FindByID(id int) (*domain.User, error)
+	FindByUsername(username string) (*domain.User, error)
+	FindByEmail(email string) (*domain.User, error)
+	Update(user *domain.User) error
 	Delete(id int) error
-	GetUserByGoogleID(googleID string) (*model.User, error)            // Google IDでユーザーを取得
-	CreateUserWithGoogle(user *model.User) (int, error)                 // Google OAuth用のユーザー作成
+	GetUserByGoogleID(googleID string) (*domain.User, error)            // Google IDでユーザーを取得
+	CreateUserWithGoogle(user *domain.User) (int, error)                 // Google OAuth用のユーザー作成
 }
 
 type userRepository struct {
@@ -26,7 +26,7 @@ func NewUserRepository(db *sql.DB) UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) Create(user *model.User) error {
+func (r *userRepository) Create(user *domain.User) error {
 	query := `
 		INSERT INTO "user" (username, email, password, created_by)
 		VALUES ($1, $2, $3, $4)
@@ -41,13 +41,13 @@ func (r *userRepository) Create(user *model.User) error {
 	).Scan(&user.ID, &user.CreatedAt)
 }
 
-func (r *userRepository) FindByID(id int) (*model.User, error) {
+func (r *userRepository) FindByID(id int) (*domain.User, error) {
 	query := `
 		SELECT id, username, email, password, google_id, deleted, created_at, created_by, updated_at, updated_by
 		FROM "user"
 		WHERE id = $1 AND deleted = false
 	`
-	user := &model.User{}
+	user := &domain.User{}
 	err := r.db.QueryRow(query, id).Scan(
 		&user.ID,
 		&user.Username,
@@ -66,13 +66,13 @@ func (r *userRepository) FindByID(id int) (*model.User, error) {
 	return user, err
 }
 
-func (r *userRepository) FindByUsername(username string) (*model.User, error) {
+func (r *userRepository) FindByUsername(username string) (*domain.User, error) {
 	query := `
 		SELECT id, username, email, password, google_id, deleted, created_at, created_by, updated_at, updated_by
 		FROM "user"
 		WHERE username = $1 AND deleted = false
 	`
-	user := &model.User{}
+	user := &domain.User{}
 	err := r.db.QueryRow(query, username).Scan(
 		&user.ID,
 		&user.Username,
@@ -91,13 +91,13 @@ func (r *userRepository) FindByUsername(username string) (*model.User, error) {
 	return user, err
 }
 
-func (r *userRepository) FindByEmail(email string) (*model.User, error) {
+func (r *userRepository) FindByEmail(email string) (*domain.User, error) {
 	query := `
 		SELECT id, username, email, password, google_id, deleted, created_at, created_by, updated_at, updated_by
 		FROM "user"
 		WHERE email = $1 AND deleted = false
 	`
-	user := &model.User{}
+	user := &domain.User{}
 	err := r.db.QueryRow(query, email).Scan(
 		&user.ID,
 		&user.Username,
@@ -116,7 +116,7 @@ func (r *userRepository) FindByEmail(email string) (*model.User, error) {
 	return user, err
 }
 
-func (r *userRepository) Update(user *model.User) error {
+func (r *userRepository) Update(user *domain.User) error {
 	query := `
 		UPDATE "user"
 		SET username = $1, email = $2, updated_at = CURRENT_TIMESTAMP, updated_by = $3
@@ -157,13 +157,13 @@ func (r *userRepository) Delete(id int) error {
 }
 
 // GetUserByGoogleID Google IDでユーザーを取得
-func (r *userRepository) GetUserByGoogleID(googleID string) (*model.User, error) {
+func (r *userRepository) GetUserByGoogleID(googleID string) (*domain.User, error) {
 	query := `
 		SELECT id, username, email, password, google_id, deleted, created_at, created_by, updated_at, updated_by
 		FROM "user"
 		WHERE google_id = $1 AND deleted = false
 	`
-	user := &model.User{}
+	user := &domain.User{}
 	err := r.db.QueryRow(query, googleID).Scan(
 		&user.ID,
 		&user.Username,
@@ -183,7 +183,7 @@ func (r *userRepository) GetUserByGoogleID(googleID string) (*model.User, error)
 }
 
 // CreateUserWithGoogle Google OAuth用のユーザー作成（パスワード不要）
-func (r *userRepository) CreateUserWithGoogle(user *model.User) (int, error) {
+func (r *userRepository) CreateUserWithGoogle(user *domain.User) (int, error) {
 	query := `
 		INSERT INTO "user" (username, email, google_id, created_by)
 		VALUES ($1, $2, $3, 'google_oauth')

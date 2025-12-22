@@ -1,17 +1,17 @@
-package repository
+package db
 
 import (
 	"database/sql"
 
-	"github.com/HH19xx/philoCompass/internal/model"
+	"github.com/HH19xx/philoCompass/internal/domain"
 )
 
 // PhilosopherRepository 哲学者データのリポジトリインターフェース
 type PhilosopherRepository interface {
 	// GetAllPhilosophers すべての哲学者データを取得（論理削除されていないもののみ）
-	GetAllPhilosophers() ([]model.Philosopher, error)
+	GetAllPhilosophers() ([]domain.Philosopher, error)
 	// GetPhilosopherByID IDで哲学者を取得
-	GetPhilosopherByID(id int) (*model.Philosopher, error)
+	GetPhilosopherByID(id int) (*domain.Philosopher, error)
 }
 
 type philosopherRepository struct {
@@ -24,7 +24,7 @@ func NewPhilosopherRepository(db *sql.DB) PhilosopherRepository {
 }
 
 // GetAllPhilosophers すべての哲学者データを取得
-func (r *philosopherRepository) GetAllPhilosophers() ([]model.Philosopher, error) {
+func (r *philosopherRepository) GetAllPhilosophers() ([]domain.Philosopher, error) {
 	query := `
 		SELECT id, name, era, description,
 			answer_01, answer_02, answer_03, answer_04,
@@ -42,9 +42,9 @@ func (r *philosopherRepository) GetAllPhilosophers() ([]model.Philosopher, error
 	}
 	defer rows.Close()
 
-	philosophers := []model.Philosopher{}
+	philosophers := []domain.Philosopher{}
 	for rows.Next() {
-		var p model.Philosopher
+		var p domain.Philosopher
 		err := rows.Scan(
 			&p.ID, &p.Name, &p.Era, &p.Description,
 			&p.Answer01, &p.Answer02, &p.Answer03, &p.Answer04,
@@ -63,7 +63,7 @@ func (r *philosopherRepository) GetAllPhilosophers() ([]model.Philosopher, error
 }
 
 // GetPhilosopherByID IDで哲学者を取得
-func (r *philosopherRepository) GetPhilosopherByID(id int) (*model.Philosopher, error) {
+func (r *philosopherRepository) GetPhilosopherByID(id int) (*domain.Philosopher, error) {
 	query := `
 		SELECT id, name, era, description,
 			answer_01, answer_02, answer_03, answer_04,
@@ -74,7 +74,7 @@ func (r *philosopherRepository) GetPhilosopherByID(id int) (*model.Philosopher, 
 		FROM philosophers
 		WHERE id = $1 AND deleted = false`
 
-	p := &model.Philosopher{}
+	p := &domain.Philosopher{}
 	err := r.db.QueryRow(query, id).Scan(
 		&p.ID, &p.Name, &p.Era, &p.Description,
 		&p.Answer01, &p.Answer02, &p.Answer03, &p.Answer04,

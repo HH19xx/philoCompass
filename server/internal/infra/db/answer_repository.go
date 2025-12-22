@@ -1,23 +1,23 @@
-package repository
+package db
 
 import (
 	"database/sql"
 
-	"github.com/HH19xx/philoCompass/internal/model"
+	"github.com/HH19xx/philoCompass/internal/domain"
 )
 
 // AnswerRepository 回答データのリポジトリインターフェース
 type AnswerRepository interface {
 	// CreateAnswer 新規回答を保存
-	CreateAnswer(answer *model.Answer) error
+	CreateAnswer(answer *domain.Answer) error
 	// GetLatestAnswerByUserID ユーザーの最新回答を取得
-	GetLatestAnswerByUserID(userID int) (*model.Answer, error)
+	GetLatestAnswerByUserID(userID int) (*domain.Answer, error)
 	// GetAllAnswers すべての回答を取得（距離計算用）
-	GetAllAnswers() ([]model.Answer, error)
+	GetAllAnswers() ([]domain.Answer, error)
 	// LinkAnswerToUser 匿名回答をユーザーに紐づける
 	LinkAnswerToUser(answerID int, userID int) error
 	// GetAnswerByID IDで回答を取得
-	GetAnswerByID(answerID int) (*model.Answer, error)
+	GetAnswerByID(answerID int) (*domain.Answer, error)
 }
 
 type answerRepository struct {
@@ -30,7 +30,7 @@ func NewAnswerRepository(db *sql.DB) AnswerRepository {
 }
 
 // CreateAnswer 回答データをDBに保存
-func (r *answerRepository) CreateAnswer(answer *model.Answer) error {
+func (r *answerRepository) CreateAnswer(answer *domain.Answer) error {
 	query := `
 		INSERT INTO answers (
 			user_id, answer_01, answer_02, answer_03, answer_04,
@@ -55,7 +55,7 @@ func (r *answerRepository) CreateAnswer(answer *model.Answer) error {
 }
 
 // GetLatestAnswerByUserID 指定ユーザーの最新回答を取得
-func (r *answerRepository) GetLatestAnswerByUserID(userID int) (*model.Answer, error) {
+func (r *answerRepository) GetLatestAnswerByUserID(userID int) (*domain.Answer, error) {
 	query := `
 		SELECT id, user_id, answer_01, answer_02, answer_03, answer_04,
 			answer_05, answer_06, answer_07, answer_08, answer_09,
@@ -66,7 +66,7 @@ func (r *answerRepository) GetLatestAnswerByUserID(userID int) (*model.Answer, e
 		ORDER BY created_at DESC
 		LIMIT 1`
 
-	answer := &model.Answer{}
+	answer := &domain.Answer{}
 	err := r.db.QueryRow(query, userID).Scan(
 		&answer.ID, &answer.UserID,
 		&answer.Answer01, &answer.Answer02, &answer.Answer03, &answer.Answer04,
@@ -87,7 +87,7 @@ func (r *answerRepository) GetLatestAnswerByUserID(userID int) (*model.Answer, e
 }
 
 // GetAllAnswers すべての回答データを取得（距離計算用）
-func (r *answerRepository) GetAllAnswers() ([]model.Answer, error) {
+func (r *answerRepository) GetAllAnswers() ([]domain.Answer, error) {
 	query := `
 		SELECT id, user_id, answer_01, answer_02, answer_03, answer_04,
 			answer_05, answer_06, answer_07, answer_08, answer_09,
@@ -102,9 +102,9 @@ func (r *answerRepository) GetAllAnswers() ([]model.Answer, error) {
 	}
 	defer rows.Close()
 
-	answers := []model.Answer{}
+	answers := []domain.Answer{}
 	for rows.Next() {
-		var answer model.Answer
+		var answer domain.Answer
 		err := rows.Scan(
 			&answer.ID, &answer.UserID,
 			&answer.Answer01, &answer.Answer02, &answer.Answer03, &answer.Answer04,
@@ -148,7 +148,7 @@ func (r *answerRepository) LinkAnswerToUser(answerID int, userID int) error {
 }
 
 // GetAnswerByID IDで回答を取得
-func (r *answerRepository) GetAnswerByID(answerID int) (*model.Answer, error) {
+func (r *answerRepository) GetAnswerByID(answerID int) (*domain.Answer, error) {
 	query := `
 		SELECT id, user_id, answer_01, answer_02, answer_03, answer_04,
 			answer_05, answer_06, answer_07, answer_08, answer_09,
@@ -157,7 +157,7 @@ func (r *answerRepository) GetAnswerByID(answerID int) (*model.Answer, error) {
 		FROM answers
 		WHERE id = $1`
 
-	answer := &model.Answer{}
+	answer := &domain.Answer{}
 	err := r.db.QueryRow(query, answerID).Scan(
 		&answer.ID, &answer.UserID,
 		&answer.Answer01, &answer.Answer02, &answer.Answer03, &answer.Answer04,

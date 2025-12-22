@@ -13,7 +13,18 @@
 }
 
 .errorMessage {
-  color: red;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.errorDescription {
+  font-size: 1rem;
+  color: #666;
+  text-align: center;
+  max-width: 400px;
+  line-height: 1.6;
 }
 
 .backButton {

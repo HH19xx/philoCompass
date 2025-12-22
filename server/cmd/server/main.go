@@ -5,10 +5,9 @@ import (
 	"os"
 
 	"github.com/HH19xx/philoCompass/internal/config"
-	"github.com/HH19xx/philoCompass/internal/handler"
-	"github.com/HH19xx/philoCompass/internal/middleware"
-	"github.com/HH19xx/philoCompass/internal/repository"
-	"github.com/HH19xx/philoCompass/internal/service"
+	"github.com/HH19xx/philoCompass/internal/infra/db"
+	handler "github.com/HH19xx/philoCompass/internal/interface/http"
+	"github.com/HH19xx/philoCompass/internal/usecase"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,24 +16,24 @@ func main() {
 	cfg := config.LoadConfig()
 
 	// データベース接続
-	db, err := config.ConnectDB(cfg)
+	dbConn, err := config.ConnectDB(cfg)
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	defer db.Close()
+	defer dbConn.Close()
 
 	// マイグレーション実行（DB_TYPEを渡す）
-	if err := config.RunMigrations(db, cfg.DBType); err != nil {
+	if err := config.RunMigrations(dbConn, cfg.DBType); err != nil {
 		log.Printf("Migration warning: %v", err)
 	}
 
 	// シードデータ投入（DB_TYPEを渡す）
-	if err := config.RunSeeds(db, cfg.DBType); err != nil {
+	if err := config.RunSeeds(dbConn, cfg.DBType); err != nil {
 		log.Printf("Seed warning: %v", err)
 	}
 
 	// サービスの初期化
-	authService := service.NewAuthService()
+	authService := usecase.NewAuthService()
 
 	// Google OAuth設定の初期化
 	googleOAuthConfig := handler.NewGoogleOAuthConfig(
@@ -46,9 +45,9 @@ func main() {
 	)
 
 	// リポジトリの初期化
-	userRepo := repository.NewUserRepository(db)
-	answerRepo := repository.NewAnswerRepository(db)
-	philosopherRepo := repository.NewPhilosopherRepository(db)
+	userRepo := db.NewUserRepository(dbConn)
+	answerRepo := db.NewAnswerRepository(dbConn)
+	philosopherRepo := db.NewPhilosopherRepository(dbConn)
 
 	// ハンドラーの初期化
 	h := handler.NewHandler(userRepo, answerRepo, philosopherRepo, authService, googleOAuthConfig)
@@ -76,7 +75,7 @@ func main() {
 
 	// 認証が必要なルーティング
 	authAPI := r.Group("/api")
-	authAPI.Use(middleware.AuthMiddleware(authService))
+	authAPI.Use(handler.AuthMiddleware(authService))
 	{
 		authAPI.POST("/answers/link", h.LinkAnswerToUserHandler) // 回答をユーザーに紐づける
 		authAPI.GET("/answers/me", h.GetMyAnswersHandler)

@@ -21,19 +21,11 @@ services:
   app:
     build: .
     container_name: philo-app
+    env_file:
+      - .env.development
     environment:
-      DB_TYPE: postgres
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: philocompass_user
-      DB_PASSWORD: strongpassword
-      DB_NAME: philocompass
-      PORT: 8081
-      APP_ENV: development
-      FRONTEND_URL: http://localhost:5173
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      GOOGLE_REDIRECT_URL: http://localhost:8081/api/auth/google/callback
+      # .envファイルの値を上書きする場合はここに記述
+      DB_HOST: db  # Dockerコンテナ内ではサービス名を使用
     ports:
       - "8081:8081"
     depends_on:

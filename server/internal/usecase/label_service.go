@@ -1,6 +1,6 @@
-package service
+package usecase
 
-import "github.com/HH19xx/philoCompass/internal/model"
+import "github.com/HH19xx/philoCompass/internal/domain"
 
 // CategoryScores カテゴリごとの合計スコア
 type CategoryScores struct {
@@ -28,7 +28,7 @@ type PhiloLabel struct {
 }
 
 // CalculatePhiloLabel 回答から哲学ラベルを計算
-func CalculatePhiloLabel(answer *model.Answer) PhiloLabel {
+func CalculatePhiloLabel(answer *domain.Answer) PhiloLabel {
 	// カテゴリスコアを計算
 	categoryScores := CategoryScores{
 		Logic:      answer.Answer01 + answer.Answer02 + answer.Answer03,

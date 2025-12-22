@@ -1,9 +1,9 @@
-package service
+package usecase
 
 import (
 	"math"
 
-	"github.com/HH19xx/philoCompass/internal/model"
+	"github.com/HH19xx/philoCompass/internal/domain"
 )
 
 // DistanceService 距離計算のサービス
@@ -15,7 +15,7 @@ func NewDistanceService() *DistanceService {
 }
 
 // CalculateEuclideanDistance 2つの16次元ベクトル間のユークリッド距離を計算
-func (s *DistanceService) CalculateEuclideanDistance(v1, v2 model.AnswerVector) float64 {
+func (s *DistanceService) CalculateEuclideanDistance(v1, v2 domain.AnswerVector) float64 {
 	var sum float64
 	for i := 0; i < 16; i++ {
 		diff := float64(v1[i] - v2[i])
@@ -25,7 +25,7 @@ func (s *DistanceService) CalculateEuclideanDistance(v1, v2 model.AnswerVector) 
 }
 
 // CountNeighbors 指定した回答から半径r以内にある回答の数をカウント
-func (s *DistanceService) CountNeighbors(target model.AnswerVector, allAnswers []model.Answer, radius float64) int {
+func (s *DistanceService) CountNeighbors(target domain.AnswerVector, allAnswers []domain.Answer, radius float64) int {
 	count := 0
 	for _, answer := range allAnswers {
 		vec := answer.ToVector()
@@ -48,7 +48,7 @@ type NeighborDistribution struct {
 }
 
 // GetNeighborDistribution 複数の半径での近傍ユーザー数を取得
-func (s *DistanceService) GetNeighborDistribution(target model.AnswerVector, allAnswers []model.Answer, radii []float64) []NeighborDistribution {
+func (s *DistanceService) GetNeighborDistribution(target domain.AnswerVector, allAnswers []domain.Answer, radii []float64) []NeighborDistribution {
 	result := make([]NeighborDistribution, len(radii))
 	for i, radius := range radii {
 		result[i] = NeighborDistribution{

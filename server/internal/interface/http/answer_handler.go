@@ -1,10 +1,10 @@
-package handler
+package http
 
 import (
-	"net/http"
+	nethttp "net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/HH19xx/philoCompass/internal/model"
+	"github.com/HH19xx/philoCompass/internal/domain"
 )
 
 // CreateAnswerRequest 回答作成リクエストの構造体
@@ -19,7 +19,7 @@ func (h *Handler) CreateAnswerHandler(c *gin.Context) {
 
 	// リクエストボディをバインド
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(nethttp.StatusBadRequest, gin.H{
 			"error": "Invalid request format",
 			"details": err.Error(),
 		})
@@ -28,7 +28,7 @@ func (h *Handler) CreateAnswerHandler(c *gin.Context) {
 
 	// 回答数のチェック
 	if len(req.Answers) != 16 {
-		c.JSON(http.StatusBadRequest, gin.H{
+		c.JSON(nethttp.StatusBadRequest, gin.H{
 			"error": "Invalid answers count",
 			"expected": 16,
 			"received": len(req.Answers),
@@ -39,7 +39,7 @@ func (h *Handler) CreateAnswerHandler(c *gin.Context) {
 	// 各回答が-2~2の範囲内かチェック
 	for i, val := range req.Answers {
 		if val < -2 || val > 2 {
-			c.JSON(http.StatusBadRequest, gin.H{
+			c.JSON(nethttp.StatusBadRequest, gin.H{
 				"error": "Answer values must be between -2 and 2",
 				"index": i + 1,
 			})
@@ -48,7 +48,7 @@ func (h *Handler) CreateAnswerHandler(c *gin.Context) {
 	}
 
 	// モデル構造体を作成（UserIDはnil = 匿名）
-	answer := &model.Answer{
+	answer := &domain.Answer{
 		UserID:   nil,
 		Answer01: req.Answers[0],
 		Answer02: req.Answers[1],
@@ -70,11 +70,11 @@ func (h *Handler) CreateAnswerHandler(c *gin.Context) {
 
 	// データベースに保存
 	if err := h.answerRepo.CreateAnswer(answer); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save answers"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to save answers"})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
+	c.JSON(nethttp.StatusCreated, gin.H{
 		"message": "Answers saved successfully",
 		"answer_id": answer.ID,
 	})
@@ -88,25 +88,25 @@ func (h *Handler) LinkAnswerToUserHandler(c *gin.Context) {
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
+		c.JSON(nethttp.StatusBadRequest, gin.H{"error": "Invalid request format"})
 		return
 	}
 
 	// JWTからユーザーIDを取得
 	userIDInterface, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.JSON(nethttp.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 	userID := userIDInterface.(int)
 
 	// 回答をユーザーに紐づける
 	if err := h.answerRepo.LinkAnswerToUser(req.AnswerID, userID); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to link answer to user"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to link answer to user"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(nethttp.StatusOK, gin.H{
 		"message": "Answer linked to user successfully",
 	})
 }
@@ -116,21 +116,25 @@ func (h *Handler) GetMyAnswersHandler(c *gin.Context) {
 	// JWTからユーザーIDを取得
 	userIDInterface, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.JSON(nethttp.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 	userID := userIDInterface.(int)
 
 	answer, err := h.answerRepo.GetLatestAnswerByUserID(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve answers"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to retrieve answers"})
 		return
 	}
 
+	// データがない場合も200を返す（フロントエンド側で判定）
 	if answer == nil {
-		c.JSON(http.StatusNotFound, gin.H{"message": "No answers found"})
+		c.JSON(nethttp.StatusOK, gin.H{
+			"data": nil,
+			"message": "No answers found",
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, answer)
+	c.JSON(nethttp.StatusOK, answer)
 }

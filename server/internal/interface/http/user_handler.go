@@ -1,10 +1,10 @@
-package handler
+package http
 
 import (
-	"net/http"
+	nethttp "net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/HH19xx/philoCompass/internal/model"
+	"github.com/HH19xx/philoCompass/internal/domain"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -26,28 +26,28 @@ func (h *Handler) RegisterHandler(c *gin.Context) {
 	var req RegisterRequest
 	
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
+		c.JSON(nethttp.StatusBadRequest, gin.H{"error": "Invalid request format"})
 		return
 	}
 
 	// ユーザー名の重複チェック
 	existingUser, _ := h.userRepo.FindByUsername(req.Username)
 	if existingUser != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Username already exists"})
+		c.JSON(nethttp.StatusConflict, gin.H{"error": "Username already exists"})
 		return
 	}
 
 	// メールアドレスの重複チェック
 	existingEmail, _ := h.userRepo.FindByEmail(req.Email)
 	if existingEmail != nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})
+		c.JSON(nethttp.StatusConflict, gin.H{"error": "Email already exists"})
 		return
 	}
 
 	// パスワードのハッシュ化
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
 		return
 	}
 
@@ -56,7 +56,7 @@ func (h *Handler) RegisterHandler(c *gin.Context) {
 	password := string(hashedPassword)
 	createdBy := "self"
 
-	user := &model.User{
+	user := &domain.User{
 		Username:  req.Username,
 		Email:     &email,
 		Password:  &password,
@@ -64,12 +64,12 @@ func (h *Handler) RegisterHandler(c *gin.Context) {
 	}
 
 	if err := h.userRepo.Create(user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create user"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to create user"})
 		return
 	}
 
 	// パスワードを含めずにレスポンス
-	c.JSON(http.StatusCreated, gin.H{
+	c.JSON(nethttp.StatusCreated, gin.H{
 		"message": "User registered successfully",
 		"user": gin.H{
 			"id":       user.ID,
@@ -84,36 +84,36 @@ func (h *Handler) LoginHandler(c *gin.Context) {
 	var req LoginRequest
 	
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request format"})
+		c.JSON(nethttp.StatusBadRequest, gin.H{"error": "Invalid request format"})
 		return
 	}
 
 	// ユーザー検索
 	user, err := h.userRepo.FindByUsername(req.Username)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(nethttp.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
 	// パスワード検証（Google OAuth認証のみのユーザーはパスワードがNULL）
 	if user.Password == nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "This account uses Google login. Please sign in with Google."})
+		c.JSON(nethttp.StatusUnauthorized, gin.H{"error": "This account uses Google login. Please sign in with Google."})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(*user.Password), []byte(req.Password)); err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.JSON(nethttp.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
 
 	// JWTトークン生成
 	token, err := h.authService.GenerateToken(user.ID, user.Username)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(nethttp.StatusOK, gin.H{
 		"message": "Login successful",
 		"token":   token,
 		"user": gin.H{

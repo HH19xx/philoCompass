@@ -66,12 +66,14 @@ export const useAuth = () => {
   };
 
   // 認証済みAPIリクエスト用のヘッダーを取得
+  // localStorageから直接読み取ることでレースコンディションを回避
   const getAuthHeaders = (): Record<string, string> => {
-    if (!authState.token) {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!token) {
       return {};
     }
     return {
-      'Authorization': `Bearer ${authState.token}`,
+      'Authorization': `Bearer ${token}`,
     };
   };
 

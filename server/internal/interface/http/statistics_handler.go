@@ -1,12 +1,12 @@
-package handler
+package http
 
 import (
-	"net/http"
+	nethttp "net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/HH19xx/philoCompass/internal/model"
-	"github.com/HH19xx/philoCompass/internal/service"
+	"github.com/HH19xx/philoCompass/internal/domain"
+	"github.com/HH19xx/philoCompass/internal/usecase"
 )
 
 // GetNeighborsHandler 指定半径内の近傍ユーザー数を取得
@@ -15,14 +15,14 @@ func (h *Handler) GetNeighborsHandler(c *gin.Context) {
 	radiusStr := c.DefaultQuery("radius", "3.0")
 	radius, err := strconv.ParseFloat(radiusStr, 64)
 	if err != nil || radius < 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid radius parameter"})
+		c.JSON(nethttp.StatusBadRequest, gin.H{"error": "Invalid radius parameter"})
 		return
 	}
 
 	// JWTからユーザーIDを取得
 	userIDInterface, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.JSON(nethttp.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 	userID := userIDInterface.(int)
@@ -30,27 +30,27 @@ func (h *Handler) GetNeighborsHandler(c *gin.Context) {
 	// ユーザーの最新回答を取得
 	userAnswer, err := h.answerRepo.GetLatestAnswerByUserID(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user answers"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to retrieve user answers"})
 		return
 	}
 	if userAnswer == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User has not answered yet"})
+		c.JSON(nethttp.StatusNotFound, gin.H{"error": "User has not answered yet"})
 		return
 	}
 
 	// すべての回答を取得
 	allAnswers, err := h.answerRepo.GetAllAnswers()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve all answers"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to retrieve all answers"})
 		return
 	}
 
 	// 距離計算サービスを使用
-	distanceService := service.NewDistanceService()
+	distanceService := usecase.NewDistanceService()
 	targetVector := userAnswer.ToVector()
 	count := distanceService.CountNeighbors(targetVector, allAnswers, radius)
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(nethttp.StatusOK, gin.H{
 		"radius": radius,
 		"count":  count,
 	})
@@ -61,7 +61,7 @@ func (h *Handler) GetNeighborDistributionHandler(c *gin.Context) {
 	// JWTからユーザーIDを取得
 	userIDInterface, exists := c.Get("user_id")
 	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "User not authenticated"})
+		c.JSON(nethttp.StatusUnauthorized, gin.H{"error": "User not authenticated"})
 		return
 	}
 	userID := userIDInterface.(int)
@@ -69,28 +69,28 @@ func (h *Handler) GetNeighborDistributionHandler(c *gin.Context) {
 	// ユーザーの最新回答を取得
 	userAnswer, err := h.answerRepo.GetLatestAnswerByUserID(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve user answers"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to retrieve user answers"})
 		return
 	}
 	if userAnswer == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User has not answered yet"})
+		c.JSON(nethttp.StatusNotFound, gin.H{"error": "User has not answered yet"})
 		return
 	}
 
 	// すべての回答を取得
 	allAnswers, err := h.answerRepo.GetAllAnswers()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve all answers"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to retrieve all answers"})
 		return
 	}
 
 	// 複数の半径で計算（1, 2, 3, 5, 10）
 	radii := []float64{1.0, 2.0, 3.0, 5.0, 10.0}
-	distanceService := service.NewDistanceService()
+	distanceService := usecase.NewDistanceService()
 	targetVector := userAnswer.ToVector()
 	distribution := distanceService.GetNeighborDistribution(targetVector, allAnswers, radii)
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(nethttp.StatusOK, gin.H{
 		"distribution": distribution,
 	})
 }
@@ -101,46 +101,46 @@ func (h *Handler) GetNeighborDistributionByAnswerIDHandler(c *gin.Context) {
 	answerIDStr := c.Param("answer_id")
 	answerID, err := strconv.Atoi(answerIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid answer_id"})
+		c.JSON(nethttp.StatusBadRequest, gin.H{"error": "Invalid answer_id"})
 		return
 	}
 
 	// 指定された回答を取得
 	answer, err := h.answerRepo.GetAnswerByID(answerID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve answer"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to retrieve answer"})
 		return
 	}
 	if answer == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Answer not found"})
+		c.JSON(nethttp.StatusNotFound, gin.H{"error": "Answer not found"})
 		return
 	}
 
 	// すべての回答を取得
 	allAnswers, err := h.answerRepo.GetAllAnswers()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve all answers"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to retrieve all answers"})
 		return
 	}
 
 	// 複数の半径で計算（1, 2, 3, 5, 10）
 	radii := []float64{1.0, 2.0, 3.0, 5.0, 10.0}
-	distanceService := service.NewDistanceService()
+	distanceService := usecase.NewDistanceService()
 	targetVector := answer.ToVector()
 	distribution := distanceService.GetNeighborDistribution(targetVector, allAnswers, radii)
 
 	// 哲学ラベルを計算
-	philoLabel := service.CalculatePhiloLabel(answer)
+	philoLabel := usecase.CalculatePhiloLabel(answer)
 
 	// 最近傍哲学者を検索
 	philosophers, err := h.philosopherRepo.GetAllPhilosophers()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve philosophers"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to retrieve philosophers"})
 		return
 	}
-	closestPhilosopher := service.FindClosestPhilosopher(answer, philosophers)
+	closestPhilosopher := usecase.FindClosestPhilosopher(answer, philosophers)
 
-	c.JSON(http.StatusOK, gin.H{
+	c.JSON(nethttp.StatusOK, gin.H{
 		"distribution":         distribution,
 		"answer":               answer,
 		"label":                philoLabel,
@@ -154,36 +154,36 @@ func (h *Handler) GetCategoryDistributionByAnswerIDHandler(c *gin.Context) {
 	answerIDStr := c.Param("answer_id")
 	answerID, err := strconv.Atoi(answerIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid answer_id"})
+		c.JSON(nethttp.StatusBadRequest, gin.H{"error": "Invalid answer_id"})
 		return
 	}
 
 	// 指定された回答を取得
 	answer, err := h.answerRepo.GetAnswerByID(answerID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve answer"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to retrieve answer"})
 		return
 	}
 	if answer == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Answer not found"})
+		c.JSON(nethttp.StatusNotFound, gin.H{"error": "Answer not found"})
 		return
 	}
 
 	// すべての回答を取得
 	allAnswers, err := h.answerRepo.GetAllAnswers()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve all answers"})
+		c.JSON(nethttp.StatusInternalServerError, gin.H{"error": "Failed to retrieve all answers"})
 		return
 	}
 
-	// []model.Answerを[]*model.Answerに変換
-	var answerPointers []*model.Answer
+	// []domain.Answerを[]*domain.Answerに変換
+	var answerPointers []*domain.Answer
 	for i := range allAnswers {
 		answerPointers = append(answerPointers, &allAnswers[i])
 	}
 
 	// カテゴリ別スコア分布を計算
-	distributions := service.CalculateCategoryDistributions(answerPointers)
+	distributions := usecase.CalculateCategoryDistributions(answerPointers)
 
-	c.JSON(http.StatusOK, distributions)
+	c.JSON(nethttp.StatusOK, distributions)
 }

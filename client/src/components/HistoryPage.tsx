@@ -101,16 +101,17 @@ function HistoryPage({ onBackToWelcome, onBackToPrevious, onLogout, getAuthHeade
         });
 
         if (!response.ok) {
-          if (response.status === 404) {
-            setError('保存された診断結果がありません');
-          } else {
-            throw new Error('診断結果の取得に失敗しました');
-          }
-          setLoading(false);
-          return;
+          throw new Error('診断結果の取得に失敗しました');
         }
 
         const data = await response.json();
+
+        // データがない場合（data.data === null または data.message === "No answers found"）
+        if (data.data === null || data.message === "No answers found") {
+          setError('保存された診断結果がありません');
+          setLoading(false);
+          return;
+        }
 
         const answersArray = [
           data.answer_01, data.answer_02, data.answer_03, data.answer_04,
@@ -153,9 +154,17 @@ function HistoryPage({ onBackToWelcome, onBackToPrevious, onLogout, getAuthHeade
   }
 
   if (error) {
+    const isNoData = error === '保存された診断結果がありません';
     return (
       <div className={styles.errorContainer}>
-        <div className={styles.errorMessage}>{error}</div>
+        <div className={styles.errorMessage}>
+          {isNoData ? 'まだ診断結果が保存されていません' : '診断結果の取得中にエラーが発生しました'}
+        </div>
+        {isNoData && (
+          <div className={styles.errorDescription}>
+            診断を受けて結果を保存すると、ここで確認できます。
+          </div>
+        )}
         <button onClick={onBackToWelcome} className={styles.backButton}>
           ホームに戻る
         </button>

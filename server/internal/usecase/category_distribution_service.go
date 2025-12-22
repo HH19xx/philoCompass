@@ -1,6 +1,6 @@
-package service
+package usecase
 
-import "github.com/HH19xx/philoCompass/internal/model"
+import "github.com/HH19xx/philoCompass/internal/domain"
 
 // CategoryDistribution カテゴリごとのスコア分布
 type CategoryDistribution struct {
@@ -18,7 +18,7 @@ type AllCategoryDistributions struct {
 }
 
 // CalculateCategoryDistributions 全ユーザーの各カテゴリスコア分布を計算
-func CalculateCategoryDistributions(answers []*model.Answer) AllCategoryDistributions {
+func CalculateCategoryDistributions(answers []*domain.Answer) AllCategoryDistributions {
 	// -6 ~ +6の各スコアの出現回数を初期化
 	logicMap := make(map[int16]int)
 	ethicsMap := make(map[int16]int)
